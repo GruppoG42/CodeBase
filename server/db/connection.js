@@ -25,5 +25,5 @@ connect().then(() => {
 });
 
 // Export the db object for use in other modules
-const db = client.db(""); //INSERIRE NOME DEL DATABASE
-module.exports = db;
+const dbtest = client.db("test"); //INSERIRE NOME DEL DATABASE
+module.exports = dbtest;
