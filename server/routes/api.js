@@ -13,11 +13,12 @@ router.post('/createItinerary', requiresAuth(), async (req, res) => {
     try {
         const userId = req.oidc.user.sub;
         const itineraryData = req.body;
+
         const newItinerary = await dbtest.collection("Itinerario").insertOne({
             ...itineraryData,
             _userId: userId
         });
-        res.json(newItinerary.ops[0]);
+        res.json(newItinerary);
     } catch (error) {
         console.error('Error creating new itinerary:', error);
         res.status(500).send('Internal Server Error');

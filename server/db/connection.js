@@ -3,16 +3,13 @@ const connectionString = process.env.NODE_ENV === 'test' ? process.env.TEST_DATA
 const dbName = process.env.NODE_ENV === 'test' ? process.env.TEST_DATABASE_NAME : process.env.PRODUCTION_DATABASE_NAME;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(connectionString);
 
 // Connect the client to the server async
 // Ping the server to verify the connection
 // Log success or failure
 
-client.connect()
-    .then(() => {
-        console.log("Connected to MongoDB Atlas");
-    }).catch((error) => {
+client.connect().catch((error) => {
         console.error("Error connecting to the database:", error);
     });
 
