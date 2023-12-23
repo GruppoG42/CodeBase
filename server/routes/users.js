@@ -1,12 +1,15 @@
 const router = require('express').Router();
 const { requiresAuth } = require('express-openid-connect');
+const db = require('../script/dbController.js');
 
 /*
  ***************************************ROUTES***************************************
 */
-router.get('/myitineraries', requiresAuth(), function (req, res) {
+router.get('/myitineraries', requiresAuth(), async function (req, res) {
+    const itineraries = await db.getUserItineraries(req.oidc.user.sub);
     res.render('myitineraries', {
-        title: 'My itineraries'
+        title: 'My itineraries',
+        itineraries: itineraries
     });
 });
 

@@ -1,5 +1,30 @@
 <%- include('partials/header') -%>
 
-<h1>Create</h1>
+<h1 class="text-4xl font-bold mb-8">Create Itinerary</h1>
+
+<div class="flex">
+    <!-- Left side: Preview -->
+    <div class="w-1/2 pr-8">
+        <h2 class="text-2xl mb-4">Itinerary Form</h2>
+        <form id="itinerary-form">>
+
+            <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create
+                Itinerary</button>
+        </form>
+    </div>
+
+    <!-- Right side: Form -->
+    <div class="w-1/2">
+        <h2 class="text-2xl mb-4">Itinerary Preview</h2>
+        <div id="itinerary-preview" class="bg-gray-200 p-4">
+            <!-- Display itinerary preview here using JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+
+</script>
 
 <%- include('partials/footer') -%>
