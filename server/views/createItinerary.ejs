@@ -1,30 +1,137 @@
 <%- include('partials/header') -%>
 
-<h1 class="text-4xl font-bold mb-8">Create Itinerary</h1>
+<h1 class="text-4xl font-bold mb-8">Crea Itinerario</h1>
 
-<div class="flex">
-    <!-- Left side: Preview -->
-    <div class="w-1/2 pr-8">
-        <h2 class="text-2xl mb-4">Itinerary Form</h2>
-        <form id="itinerary-form">>
+<form>
+    <label class="block mb-2">
+        <span class="text-gray-700">Nome: </span>
+        <input name="name" class="form-input mt-1" placeholder="Nome"/>
+    </label>
+    <label class="block mb-2">
+        <span class="text-gray-700">Descrizione</span>
+        <textarea id="description" class="form-textarea mt-1 block w-full" rows="1" name="description"
+                  placeholder="Descrizione"></textarea>
+    </label>
 
-            <button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create
-                Itinerary</button>
-        </form>
-    </div>
+    <p class="text-gray-700">Giorni</p>
+    <button type="button" id='button-days' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onclick="day()">
+        Aggiungi Giorno
+    </button>
 
-    <!-- Right side: Form -->
-    <div class="w-1/2">
-        <h2 class="text-2xl mb-4">Itinerary Preview</h2>
-        <div id="itinerary-preview" class="bg-gray-200 p-4">
-            <!-- Display itinerary preview here using JavaScript -->
-        </div>
-    </div>
-</div>
+    <div class="container-days"></div>
+
+    <button id='button-submit' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onclick="submit()">
+        Crea
+    </button>
+</form>
 
 <script>
+    let i = 0;
+
+    function day() {
+        i++;
+        const containerDays = document.querySelector('.container-days');
+        const containerDay = document.createElement('div');
+        containerDay.classList.add('container-day');
+        containerDay.innerHTML = "Giorno " + i+
+            "<label class='block mb-2'> " +
+            "<span class='text-gray-700'>" +
+            "Descrizione" +
+            "</span>" +
+            "<textarea name='"+i+"-desc' class='form-textarea mt-1 block w-full' rows='1' placeholder='Descrizione'></textarea> " +
+            "</label> " +
+            "<label class='block mb-2'>" +
+            "<span class='text-gray-700'>Tappa</span>" +
+            "<input name='"+i+"-tappa' class='form-input mt-1 block'  placeholder='Tappa' /> " +
+            "</label> " +
+            // "<div class= 'dropdown-container' ></div>" +
+            "<button type='button' class='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'" +
+            "onclick='alloggio(this)'>" +
+            "Aggiungi Alloggio" +
+            "</button>" +
+            "<div class= 'alloggio-container' ></div>" +
+            "<button type='button' class='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'" +
+            "onclick='ristoro(this)'>" +
+            "Aggiungi Ristoro" +
+            "</button>" +
+            "<div class= 'ristor-container' ></div>" +
+            "</div>";
+        containerDays.appendChild(containerDay);
+    }
+
+    function alloggio(button) {
+        const containerDay = button.closest('.container-day');
+        const alloggioContainer = containerDay.querySelector(".alloggio-container");
+        if (alloggioContainer.innerHTML === "") {
+            alloggioContainer.innerHTML = "<label class='block mb-2'>" +
+                "<span class='text-gray-700'>Alloggio</span>" +
+                "<input name='"+i+0+"-alloggio' class='form-input mt-1 block'  placeholder='Alloggio' /> " +
+                "</label> ";
+        }
+
+        dropdownContainer.appendChild(input);
+    }
+
+    function searchStreet(input) {
+        const value = input.value;
+        if (value.trim() !== "") {
+            fetch(`/api/searchStreet?address=${encodeURIComponent(value)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Errore nella richiesta: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    showResult(data, input);
+                })
+                .catch(error => {
+                    console.error(`Errore nella richiesta: ${error.message}`);
+                });
+        }
+    }
+
+    function showResult(data, input) {
+        const containerDay = input.closest('.container-day');
+        const dropdownContainer = containerDay.querySelector(".dropdown-container");
+        dropdownContainer.innerHTML = "";
+
+        data.streets.forEach(result => {
+            const dropdownItem = document.createElement("div");
+            dropdownItem.classList.add(".dropdown-item","hover:bg-gray-300");
+            dropdownItem.textContent = result;
+            dropdownItem.addEventListener("click", () => {
+                input.value = result;
+                hide(input);
+            });
+            dropdownContainer.appendChild(dropdownItem);
+        });
+
+        if (data.streets.length === 0) {
+            hide(input)
+        } else {
+            show(input);
+        }
+
+        dropdownContainer.classList.remove("hidden");
+    }
+
+    function show(input) {
+        const containerDay = input.closest('.container-day');
+        const dropdownContainer = containerDay.querySelector(".dropdown-container");
+        dropdownContainer.classList.remove("hidden");
+    }
+
+    function hide(input) {
+        const containerDay = input.closest('.container-day');
+        const dropdownContainer = containerDay.querySelector(".dropdown-container");
+        dropdownContainer.classList.add("hidden");
+    }
 
 </script>
+
 
 <%- include('partials/footer') -%>

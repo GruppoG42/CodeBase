@@ -35,9 +35,17 @@ router.get('/getUserItineraries', requiresAuth() ,async (req, res) => {
     }
 });
 
-// Get user info
-// router.get ('/getUserInfo/', async (req, res) => {
-//
-// });
+// Get from Google Maps API the streets from a String (address)
+router.get('/searchStreet', async (req, res) => {
+    try {
+        const address = req.query.address;
+        res.json({
+            streets: ["Result 1","Result 2", address]
+        });
+    } catch (error) {
+        console.error('Error fetching streets:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 module.exports =  router;
