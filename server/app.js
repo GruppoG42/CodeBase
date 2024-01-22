@@ -36,13 +36,13 @@ if (!config.baseURL && !process.env.BASE_URL && process.env.PORT && process.env.
     config.baseURL = `http://localhost:${port}`;
 }
 
-app.use(auth(config));
-
-// Middleware to make the `user` object available for all views
-app.use(function (req, res, next) {
-    res.locals.user = req.oidc.user;
-    next();
-});
+// app.use(auth(config));
+//
+// // Middleware to make the `user` object available for all views
+// app.use(function (req, res, next) {
+//     res.locals.user = req.oidc.user;
+//     next();
+// });
 
 // Load routes
 app.use('/', indexRouting);

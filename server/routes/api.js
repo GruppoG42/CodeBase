@@ -23,12 +23,26 @@ router.post('/createItinerary', requiresAuth(), async (req, res) => {
     }
 });
 
+// // Get all user itineraries
+// router.get('/getUserItineraries', requiresAuth() ,async (req, res) => {
+// // router.get('/getUserItineraries',async (req, res) => {
+//     try {
+//         const userId = req.oidc.user.sub;
+//         const userItineraries = await db.getUserItineraries(userId);
+//         res.json(userItineraries);
+//         res.status(200)
+//     } catch (error) {
+//         console.error('Error fetching user itineraries:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
+
 // Get all user itineraries
-router.get('/getUserItineraries', requiresAuth() ,async (req, res) => {
+router.get('/test', async(req, res) => {
     try {
-        const userId = req.oidc.user.sub;
-        const userItineraries = await db.getUserItineraries(userId);
-        res.json(userItineraries);
+        res.json({
+            streets: ["Result 1","Result 2", "address"]
+        });
     } catch (error) {
         console.error('Error fetching user itineraries:', error);
         res.status(500).send('Internal Server Error');
