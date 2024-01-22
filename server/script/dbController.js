@@ -1,4 +1,7 @@
 const dbtest = require("../db/connection.js");
+// Importa il modulo 'bson'
+const {ObjectId} = require('mongodb');
+
 
 async function createItinerary(itineraryData) {
     try {
@@ -16,7 +19,26 @@ async function getUserItineraries(userId) {
     }
 }
 
+async function createUser(nome, cognome, email) {
+    try {
+        return await dbtest.collection("Utente").insertOne({ nome, cognome, email });
+    } catch (error) {
+        throw new Error(`Error creating user: ${error}`);
+    }
+}
+
+async function checkUser(id) {
+    try {
+        const objectID = new ObjectId(id);
+        return await dbtest.collection("Utente").findOne({ "_id": objectID });
+    } catch (error) {
+        throw new Error(`Error checking user: ${error}`);
+    }
+}
+
 module.exports = {
     createItinerary,
-    getUserItineraries
+    getUserItineraries,
+    createUser,
+    checkUser
 };

@@ -48,10 +48,11 @@ if (!config.baseURL && !process.env.BASE_URL && process.env.PORT && process.env.
 app.use('/', indexRouting);
 app.use('/', usersRouting);
 app.use('/api', apiRouting);
+app.use(express.json());
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    const err = new Error('Not Found');
+    const err = new Error('Not Found - ' + req.originalUrl);
     err.status = 404;
     next(err);
 });
