@@ -1,6 +1,23 @@
 const dbtest = require("../db/connection.js");
 const {ObjectId} = require('mongodb');
 
+function createUser(nome, cognome, email) {
+    try {
+        return dbtest.collection("Utente").insertOne({ nome, cognome, email });
+    } catch (error) {
+        throw new Error(`Error creating user: ${error}`);
+    }
+}
+
+function checkUser(id) {
+    try {
+        const objectID = new ObjectId(id);
+        return dbtest.collection("Utente").findOne({ "_id": objectID });
+    } catch (error) {
+        throw new Error(`Error checking user: ${error}`);
+    }
+}
+
 function creaItinerario(itineraryData, userId) {
     try {
         return dbtest.collection("Itinerario").insertOne({
@@ -35,6 +52,15 @@ function visualizzaItinerariAltrui(filtro) {
     } catch (error) {
         throw new Error(`Error fetching user itineraries: ${error}`);
     }
+}
+
+export {
+    createUser,
+    checkUser,
+    creaItinerario,
+    eliminaItinerario,
+    visualizzaItinerari,
+    visualizzaItinerariAltrui
 }
 
 

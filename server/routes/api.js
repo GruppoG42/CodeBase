@@ -2,6 +2,10 @@ const router = require('express').Router();
 const { requiresAuth } = require('express-openid-connect');
 
 const db = require('../script/dbController.js');
+const itinerarioManager = require('../managers/itinerarioManager.js');
+const giornoManager = require('../managers/giornoManager.js');
+const tappaManager = require('../managers/tappaManager.js');
+const tripplerManager = require('../managers/tripplerManager.js');
 
 /*
  ***************************************ROUTES***************************************
@@ -12,7 +16,6 @@ router.post('/createUser', async (req, res) => {
     //output id
     try {
         const userData = req.body;
-        console.log(req);
         const nome = userData.nome;
         const cognome = userData.cognome;
         const email = userData.email;
@@ -20,7 +23,7 @@ router.post('/createUser', async (req, res) => {
             res.status(400).send('Bad Request ' + userData.nome);
             return;
         }
-        const newUser = await db.createUser(nome, cognome, email);
+        const newUser = tripplerManager.createUser(nome, cognome, email);
         res.json(newUser);
     } catch (error) {
         console.error('Error creating new user:', error);
@@ -55,7 +58,7 @@ router.post('/createItinerary', async (req, res) => {
             descrizione,
             attivo
         };
-        const newItinerary = await db.createItinerary({
+        const newItinerary = await itinerarioManager.createItinerary({
             ...itineraryData,
             _userId: userId
         });
@@ -75,23 +78,9 @@ router.get('/getUserItineraries',async (req, res) => {
             return;
         }
         const userId = req.header('userId');
-        const userItineraries = await db.getUserItineraries(userId);
+        const userItineraries = itinerarioManager.getUserItineraries(userId);
         res.json(userItineraries);
         res.status(200)
-    } catch (error) {
-        console.error('Error fetching user itineraries:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-// Get all user itineraries
-router.get('/test', async(req, res) => {
-    try {
-        const userId = req.header('userId');
-        console.log(userId);
-        res.json({
-            streets: ["Result 1","Result 2", "address"]
-        });
     } catch (error) {
         console.error('Error fetching user itineraries:', error);
         res.status(500).send('Internal Server Error');

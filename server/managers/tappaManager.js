@@ -8,3 +8,8 @@ async function calcolaDistanza(startPoint, mezzo) {
 async function calcolaPercorso(startPoint, mezzo) {
     //TODO: implementare
 }
+
+export {
+    calcolaDistanza,
+    calcolaPercorso
+}

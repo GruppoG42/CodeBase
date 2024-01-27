@@ -35,3 +35,11 @@ function eliminaTappaId(idItinerario, giorno, idTappa) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
 }
+
+export {
+    calcolaDistanza,
+    calcolaPercorso,
+    aggiungiTappa,
+    eliminaTappa,
+    eliminaTappaId
+}
