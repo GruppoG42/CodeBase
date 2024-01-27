@@ -3,7 +3,7 @@ const {ObjectId} = require('mongodb');
 
 function createUser(nome, cognome, email) {
     try {
-        return dbtest.collection("Utente").insertOne({ nome, cognome, email });
+        return dbtest.collection("Utente").insertOne({nome, cognome, email});
     } catch (error) {
         throw new Error(`Error creating user: ${error}`);
     }
@@ -12,7 +12,7 @@ function createUser(nome, cognome, email) {
 function checkUser(id) {
     try {
         const objectID = new ObjectId(id);
-        return dbtest.collection("Utente").findOne({ "_id": objectID });
+        return dbtest.collection("Utente").findOne({"_id": objectID});
     } catch (error) {
         throw new Error(`Error checking user: ${error}`);
     }
@@ -32,7 +32,7 @@ function creaItinerario(itineraryData, userId) {
 function eliminaItinerario(id) {
     try {
         const objectID = new ObjectId(id);
-        return dbtest.collection("Itinerario").deleteOne({ "_id": objectID });
+        return dbtest.collection("Itinerario").deleteOne({"_id": objectID});
     } catch (error) {
         throw new Error(`Error deleting itinerary: ${error}`);
     }
@@ -40,7 +40,7 @@ function eliminaItinerario(id) {
 
 function visualizzaItinerari(userId) {
     try {
-        return dbtest.collection("Itinerario").find({ "_userId": userId }).toArray();
+        return dbtest.collection("Itinerario").find({"_userId": userId}).toArray();
     } catch (error) {
         throw new Error(`Error fetching user itineraries: ${error}`);
     }
@@ -54,7 +54,7 @@ function visualizzaItinerariAltrui(filtro) {
     }
 }
 
-export {
+module.exports = {
     createUser,
     checkUser,
     creaItinerario,

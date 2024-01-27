@@ -36,8 +36,7 @@ function eliminaTappaId(idItinerario, giorno, idTappa) {
     }
 }
 
-export {
-    calcolaDistanza,
+module.exports = {    calcolaDistanza,
     calcolaPercorso,
     aggiungiTappa,
     eliminaTappa,

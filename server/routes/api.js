@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { requiresAuth } = require('express-openid-connect');
+const {requiresAuth} = require('express-openid-connect');
 
 const db = require('../script/dbController.js');
 const itinerarioManager = require('../managers/itinerarioManager.js');
@@ -35,7 +35,7 @@ router.post('/createUser', async (req, res) => {
 // Create a new itinerary
 router.post('/createItinerary', async (req, res) => {
     try {
-        if(!await checkUser(req)) {
+        if (!checkUser(req)) {
             res.status(401).send('Unauthorized');
             return;
         }
@@ -70,10 +70,10 @@ router.post('/createItinerary', async (req, res) => {
 });
 
 // Get all user itineraries
-router.get('/getUserItineraries',async (req, res) => {
+router.get('/getUserItineraries', async (req, res) => {
 // router.get('/getUserItineraries',async (req, res) => {
     try {
-        if(!await checkUser(req)) {
+        if (!checkUser(req)) {
             res.status(401).send('Unauthorized');
             return;
         }
@@ -92,7 +92,7 @@ router.get('/searchStreet', async (req, res) => {
     try {
         const address = req.query.address;
         res.json({
-            streets: ["Result 1","Result 2", address]
+            streets: ["Result 1", "Result 2", address]
         });
     } catch (error) {
         console.error('Error fetching streets:', error);
@@ -100,13 +100,13 @@ router.get('/searchStreet', async (req, res) => {
     }
 });
 
-async function checkUser(req) {
+function checkUser(req) {
     try {
         const userId = req.header('userId');
-        return await db.checkUser(userId);
+        return db.checkUser(userId);
     } catch (error) {
         return false;
     }
 }
 
-module.exports =  router;
+module.exports = router;

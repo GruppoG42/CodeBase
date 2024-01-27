@@ -9,7 +9,6 @@ async function calcolaPercorso(startPoint, mezzo) {
     //TODO: implementare
 }
 
-export {
-    calcolaDistanza,
+module.exports = {    calcolaDistanza,
     calcolaPercorso
 }

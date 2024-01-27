@@ -80,7 +80,7 @@ function getUserItineraries(userId) {
     }
 }
 
-export {
+module.exports = {
     calcolaTempoPercorrenza,
     recensisci,
     aggiungiGiorno,
