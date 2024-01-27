@@ -1,5 +1,4 @@
 const dbtest = require("../db/connection.js");
-// Importa il modulo 'bson'
 const {ObjectId} = require('mongodb');
 
 
