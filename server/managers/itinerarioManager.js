@@ -1,14 +1,36 @@
 const dbtest = require("../db/connection.js");
 const {ObjectId} = require('mongodb');
+const axios = require('axios');
 
 async function calcolaTempoPercorrenza(start, end, mezzo) {
-    //TODO: implementare
+    const url = 'https://maps.googleapis.com/maps/api/directions/json';
+
+    try {
+        const response = await axios.get(url, {
+            params: {
+                origin: start,
+                destination: end,
+                mode: mezzo,
+                key: dbtest.apiKey,
+            },
+        });
+
+        // Estrai il tempo di percorrenza dalla risposta di Google Maps
+        const tempoPercorrenza = response.data.routes[0].legs[0].duration.text;
+
+        console.log(`Il tempo di percorrenza da ${start} a ${end} in ${mezzo} è di ${tempoPercorrenza}.`);
+
+        return tempoPercorrenza;
+    } catch (error) {
+        console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
+        throw error;
+    }
 }
 
-function recensisci(idItinerario, recensione) {
+function recensisci(idItinerario, recensione, punteggio) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { recensioni: recensione } });
+        return dbtest.dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { recensioni: { recensione, punteggio } } });
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
@@ -17,7 +39,7 @@ function recensisci(idItinerario, recensione) {
 function aggiungiGiorno(g, idItinerario) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { giorni: g } });
+        return dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { giorni: g } });
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
@@ -26,7 +48,7 @@ function aggiungiGiorno(g, idItinerario) {
 function contieneGiorno(g, idItinerario) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.collection("Itinerario").findOne({ "_id": objectID, "giorni": g });
+        return dbtest.dbtest.collection("Itinerario").findOne({ "_id": objectID, "giorni": g });
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
@@ -34,7 +56,7 @@ function contieneGiorno(g, idItinerario) {
 
 function cercaItinerari() {
     try {
-        return dbtest.collection("Itinerario").find().toArray();
+        return dbtest.dbtest.collection("Itinerario").find().toArray();
     } catch (error) {
         throw new Error(`Error fetching itineraries: ${error}`);
     }
@@ -42,7 +64,7 @@ function cercaItinerari() {
 
 function cercaItinerarioPerNome(nome) {
     try {
-        return dbtest.collection("Itinerario").find({ "nome": nome }).toArray();
+        return dbtest.dbtest.collection("Itinerario").find({ "nome": nome }).toArray();
     } catch (error) {
         throw new Error(`Error fetching itineraries: ${error}`);
     }
@@ -50,7 +72,7 @@ function cercaItinerarioPerNome(nome) {
 
 function cercaItinerarioPerStato(stato) {
     try {
-        return dbtest.collection("Itinerario").find({ "stato": stato }).toArray();
+        return dbtest.dbtest.collection("Itinerario").find({ "stato": stato }).toArray();
     } catch (error) {
         throw new Error(`Error fetching itineraries: ${error}`);
     }
@@ -58,7 +80,7 @@ function cercaItinerarioPerStato(stato) {
 
 function cercaItinerarioPerDurata(durata) {
     try {
-        return dbtest.collection("Itinerario").find({ "durata": durata }).toArray();
+        return dbtest.dbtest.collection("Itinerario").find({ "durata": durata }).toArray();
     } catch (error) {
         throw new Error(`Error fetching itineraries: ${error}`);
     }
@@ -66,7 +88,7 @@ function cercaItinerarioPerDurata(durata) {
 
 function createItinerary(itineraryData) {
     try {
-        return dbtest.collection("Itinerario").insertOne(itineraryData);
+        return dbtest.dbtest.collection("Itinerario").insertOne(itineraryData);
     } catch (error) {
         throw new Error(`Error creating itinerary: ${error}`);
     }
@@ -74,7 +96,7 @@ function createItinerary(itineraryData) {
 
 function getUserItineraries(userId) {
     try {
-        return dbtest.collection("Itinerario").find({ "_userId": userId }).toArray();
+        return dbtest.dbtest.collection("Itinerario").find({ "_userId": userId }).toArray();
     } catch (error) {
         throw new Error(`Error fetching user itineraries: ${error}`);
     }

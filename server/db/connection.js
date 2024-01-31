@@ -16,4 +16,5 @@ client.connect().catch((error) => {
 
 // Export the db object for use in other modules
 const dbtest = client.db(dbName); //INSERIRE NOME DEL DATABASE
-module.exports = dbtest;
+const apiKey = "AIzaSyDaeO1yQq8EyP7SeYqRaCfMbWs4412ZnIg";
+module.exports = { dbtest, apiKey };

@@ -8,7 +8,7 @@
         {
           "descrizione": "Descrizione della tappa 1",
           "giorno": 1,
-          "luogo": "Località di Tappa 1",
+          "luogo": "Milano",
           "ristori": ["Ristoro 1", "Ristoro 2"],
           "alloggi": ["Alloggio 1", "Alloggio 2"],
           "descrizione_tappa": "Descrizione dettagliata della tappa 1"
@@ -16,7 +16,7 @@
         {
           "descrizione": "Descrizione della tappa 2",
           "giorno": 1,
-          "luogo": "Località di Tappa 2",
+          "luogo": "Trento",
           "ristori": ["Ristoro 3", "Ristoro 4"],
           "alloggi": ["Alloggio 3", "Alloggio 4"],
           "descrizione_tappa": "Descrizione dettagliata della tappa 2"
@@ -29,7 +29,7 @@
         {
           "descrizione": "Descrizione della tappa 3",
           "giorno": 2,
-          "luogo": "Località di Tappa 3",
+          "luogo": "Rovereto",
           "ristori": ["Ristoro 5", "Ristoro 6"],
           "alloggi": ["Alloggio 5", "Alloggio 6"],
           "descrizione_tappa": "Descrizione dettagliata della tappa 3"
@@ -37,7 +37,7 @@
         {
           "descrizione": "Descrizione della tappa 4",
           "giorno": 2,
-          "luogo": "Località di Tappa 4",
+          "luogo": "Roma",
           "ristori": ["Ristoro 7", "Ristoro 8"],
           "alloggi": ["Alloggio 7", "Alloggio 8"],
           "descrizione_tappa": "Descrizione dettagliata della tappa 4"

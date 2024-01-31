@@ -14,6 +14,8 @@ const apiRouting = require("./routes/api.js");
 
 const app = express()
 
+
+
 // Set views and views engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
