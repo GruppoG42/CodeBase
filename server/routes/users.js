@@ -5,11 +5,9 @@ const db = require('../script/dbController.js');
 /*
  ***************************************ROUTES***************************************
 */
-router.get('/myitineraries', requiresAuth(), async function (req, res) {
-    const itineraries = await db.getUserItineraries(req.oidc.user.sub);
+router.get('/myitineraries', async function (req, res) {
     res.render('myitineraries', {
-        title: 'My itineraries',
-        itineraries: itineraries
+        title: 'My itineraries'
     });
 });
 

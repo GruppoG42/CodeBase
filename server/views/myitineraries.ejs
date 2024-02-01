@@ -1,21 +1,171 @@
 <%- include('partials/header') -%>
 
+<style>
+    .itinerary {
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .itinerary h2 {
+        margin-top: 0;
+    }
+
+    .itinerary .day {
+        margin-bottom: 10px;
+        display: none; /* Hide the days by default */
+    }
+
+    .itinerary .day .stop {
+        margin-left: 20px;
+    }
+
+    .itinerary .day .stop {
+        margin-left: 20px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .itinerary {
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .itinerary .day {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        display: none; /* Hide the days by default */
+    }
+
+    .itinerary .day .stop {
+        border: 1px solid #bbb;
+        margin-left: 20px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .toggle {
+        padding: 10px 20px; /* Increase the size of the button */
+        color: white; /* Text color */
+        border: none; /* Remove default border */
+        cursor: pointer; /* Change cursor to pointer */
+        transition: background-color 0.3s ease; /* Smooth transition */
+    }
+
+    .toggle.open {
+        background-color: red; /* Red when open */
+    }
+
+    .toggle.closed {
+        background-color: green; /* Green when closed */
+    }
+
+    .itinerary .day {
+        display: none; /* Hide the days by default */
+    }
+
+
+</style>
+
 <h1>My Itineraries</h1>
 
-<% if (itineraries.length === 0) { %>
-    <p>No itineraries found.</p>
-<% } else { %>
-    <ul>
-        <% itineraries.forEach(itinerary => { %>
-            <li>
-                <strong><%= itinerary.nome %></strong> - <%= itinerary.descrizione %>
-            </li>
-        <% }); %>
-    </ul>
-<% } %>
+<div id="itineraries"></div>
 
-<p class="py-3">
-    <a class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href="/createItinerary">Create Itinerary</a>
-</p>
+<script>
+    async function fetchItineraries() {
+        try {
+            const response = await fetch('/api/getUserItineraries', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'userId': '65ae9a60b1c0d0c8c09cc34b'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const itineraries = await response.json();
+            return itineraries;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
-<%- include('partials/footer') -%>
+    function createItineraryDiv(itinerary) {
+        const itineraryDiv = document.createElement('div');
+        itineraryDiv.className = 'itinerary';
+        const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`
+        itineraryDiv.innerHTML = `
+        <h2>${itinerary.nome}</h2>
+        <p>${itinerary.descrizione}</p>
+        <p>Number of days: ${itinerary.giorni.length}</p>
+        ${button}
+        ${itinerary.giorni.map(createDayDiv).join('')}
+    `;
+        //press button to toggle days (not event listener)
+
+        return itineraryDiv;
+    }
+
+    function createDayDiv(day) {
+        return `
+    <div class="day">
+        <h3>Day: ${day.descrizione}</h3>
+        ${day.tappe.map(createStopDiv).join('')}
+    </div>
+    `;
+    }
+
+    function createStopDiv(stop, index) {
+        const ristori = Array.isArray(stop.ristori) ? stop.ristori.join(', ') : stop.ristori;
+        const alloggi = Array.isArray(stop.alloggi) ? stop.alloggi.join(', ') : stop.alloggi;
+        return `
+        <div class="stop">
+            <h4>Tappa ${index + 1}</h4>
+            <p>Descrizione: ${stop.descrizione}</p>
+            <p>Location: ${stop.luogo}</p>
+            <p>Ristori: ${ristori}</p>
+            <p>Alloggi: ${alloggi}</p>
+        </div>
+    `;
+    }
+
+    fetchItineraries().then(itineraries => {
+        const itinerariesDiv = document.getElementById('itineraries');
+        itineraries.forEach(itinerary => {
+            const itineraryDiv = createItineraryDiv(itinerary);
+            itinerariesDiv.appendChild(itineraryDiv);
+            addToggleEventListener(itineraryDiv); // Add this line
+        });
+    });
+
+    function addToggleEventListener(itineraryDiv) {
+        const toggleButton = itineraryDiv.querySelector('.toggle');
+        toggleButton.classList.remove('open');
+        toggleButton.classList.add('closed');
+        toggleButton.addEventListener('click', () => {
+            const days = itineraryDiv.querySelectorAll('.day');
+            console.log(days);
+            days.forEach(day => {
+                if (!day.style.display || day.style.display === 'none') {
+                    day.style.display = 'block';
+                    toggleButton.classList.remove('closed');
+                    toggleButton.classList.add('open');
+                } else {
+                    day.style.display = 'none';
+                    toggleButton.classList.remove('open');
+                    toggleButton.classList.add('closed');
+                }
+            });
+        });
+    }
+</script>
