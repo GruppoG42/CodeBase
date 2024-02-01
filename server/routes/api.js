@@ -142,12 +142,37 @@ router.post('/createItinerary', async (req, res) => {
         const nome = req.body.nome;
         const stato = req.body.stato;
         const giorni = req.body.giorni;
-        const recensioni = req.body.recensioni;
+        let recensioni = req.body.recensioni;
         const descrizione = req.body.descrizione;
-        const attivo = req.body.attivo;
-        if (!nome || !stato || !giorni || !recensioni || !descrizione || !attivo) {
-            res.status(400).send('Bad Request');
+        let attivo = req.body.attivo;
+        if(!nome) {
+            console.log("nome")
+            res.status(400).send('Bad Request: nome is required');
             return;
+        }
+        if(!stato) {
+            console.log("stato")
+            res.status(400).send('Bad Request: stato is required');
+            return;
+        }
+        if(!giorni) {
+            console.log("giorni")
+            res.status(400).send('Bad Request: giorni is required');
+            return;
+        }
+        if(!recensioni) {
+            recensioni = [];
+        }
+        if(!descrizione) {
+            console.log("descrizione")
+            res.status(400).send('Bad Request: descrizione is required');
+            return;
+        }
+        if(!attivo) {
+            // console.log("attivo")
+            // res.status(400).send('Bad Request: attivo is required');
+            // return;
+            attivo = true;
         }
         const itineraryData = {
             nome,
@@ -351,6 +376,9 @@ router.get('/calcPath', async (req, res) => {
 function checkUser(req) {
     try {
         const userId = req.header('userId');
+        if(!userId) {
+            return false;
+        }
         return tripplerManager.checkUser(userId);
     } catch (error) {
         return false;

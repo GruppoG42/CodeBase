@@ -1,135 +1,310 @@
 <%- include('partials/header') -%>
 
-<h1 class="text-4xl font-bold mb-8">Crea Itinerario</h1>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
 
-<form>
-    <label class="block mb-2">
-        <span class="text-gray-700">Nome: </span>
-        <input name="name" class="form-input mt-1" placeholder="Nome"/>
+    input[type="text"], textarea {
+        background-color: #f2f2f2; /* light grey */
+    }
+
+    #days-container > div > div {
+        margin-left: 30%; /* adjust this value as needed */
+        width: 70%;
+        margin-bottom: 50px; /* adjust this value as needed */
+    }
+
+    #days-container > div {
+        margin-left: 5%; /* adjust this value as needed */
+        width: 80%;
+    }
+
+    #days-container div div {
+        margin-top: 20px; /* adjust this value as needed */
+        margin-bottom: 20px; /* adjust this value as needed */
+    }
+
+    #days-container div div {
+        border: 1px solid black; /* adjust color and thickness as needed */
+        padding: 10px; /* adjust as needed */
+        margin-bottom: 20px; /* adjust this value as needed */
+    }
+
+    #days-container div .tappa {
+        border: 1px solid black; /* adjust color and thickness as needed */
+        padding: 10px; /* adjust as needed */
+        margin-bottom: 20px; /* adjust this value as needed */
+    }
+
+    #days-container > div {
+        border: 1px solid black; /* adjust color and thickness as needed */
+        padding: 10px; /* adjust as needed */
+        margin-bottom: 20px; /* adjust this value as needed */
+        margin-left: 5%; /* adjust this value as needed */
+        width: 80%;
+    }
+
+    form {
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    form {
+        border: 1px solid black; /* adjust color and thickness as needed */
+        padding: 10px; /* adjust as needed */
+        margin-bottom: 20px; /* adjust this value as needed */
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    label {
+        display: block;
+        margin-top: 20px;
+    }
+
+    input[type="text"], textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
+
+    button, input[type="submit"] {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover, input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create Itinerary</title>
+</head>
+<body>
+<button type="button" onclick="insertTestValues()">Insert Test Values</button>
+<form id="itinerary-form">
+    <label>
+        Nome:
+        <input type="text" id="nome" nome="nome" required>
     </label>
-    <label class="block mb-2">
-        <span class="text-gray-700">Descrizione</span>
-        <textarea id="description" class="form-textarea mt-1 block w-full" rows="1" name="description"
-                  placeholder="Descrizione"></textarea>
+    <label>
+        Stato:
+        <input type="text" id="stato" nome="stato" required>
     </label>
-
-    <p class="text-gray-700">Giorni</p>
-    <button type="button" id='button-days' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onclick="day()">
-        Aggiungi Giorno
-    </button>
-
-    <div class="container-days"></div>
-
-    <button id='button-submit' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onclick="submit()">
-        Crea
-    </button>
+    <label>
+        Descrizione:
+        <textarea id="descrizione" nome="descrizione" required></textarea>
+    </label>
+    <div id="days-container">
+        <!-- Days will be added here dynamically -->
+    </div>
+    <button type="button" onclick="addDay()">Add Day</button>
+    <input type="submit" value="Submit">
 </form>
 
+</body>
+</html>
+
 <script>
-    let i = 0;
-
-    function day() {
-        i++;
-        const containerDays = document.querySelector('.container-days');
-        const containerDay = document.createElement('div');
-        containerDay.classList.add('container-day');
-        containerDay.innerHTML = "Giorno " + i+
-            "<label class='block mb-2'> " +
-            "<span class='text-gray-700'>" +
-            "Descrizione" +
-            "</span>" +
-            "<textarea name='"+i+"-desc' class='form-textarea mt-1 block w-full' rows='1' placeholder='Descrizione'></textarea> " +
-            "</label> " +
-            "<label class='block mb-2'>" +
-            "<span class='text-gray-700'>Tappa</span>" +
-            "<input name='"+i+"-tappa' class='form-input mt-1 block'  placeholder='Tappa' /> " +
-            "</label> " +
-            // "<div class= 'dropdown-container' ></div>" +
-            "<button type='button' class='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'" +
-            "onclick='alloggio(this)'>" +
-            "Aggiungi Alloggio" +
-            "</button>" +
-            "<div class= 'alloggio-container' ></div>" +
-            "<button type='button' class='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'" +
-            "onclick='ristoro(this)'>" +
-            "Aggiungi Ristoro" +
-            "</button>" +
-            "<div class= 'ristor-container' ></div>" +
-            "</div>";
-        containerDays.appendChild(containerDay);
-    }
-
-    function alloggio(button) {
-        const containerDay = button.closest('.container-day');
-        const alloggioContainer = containerDay.querySelector(".alloggio-container");
-        if (alloggioContainer.innerHTML === "") {
-            alloggioContainer.innerHTML = "<label class='block mb-2'>" +
-                "<span class='text-gray-700'>Alloggio</span>" +
-                "<input name='"+i+0+"-alloggio' class='form-input mt-1 block'  placeholder='Alloggio' /> " +
-                "</label> ";
+    function getRandomString(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
         }
-
-        dropdownContainer.appendChild(input);
+        return result;
     }
 
-    function searchStreet(input) {
-        const value = input.value;
-        if (value.trim() !== "") {
-            fetch(`/api/searchStreet?address=${encodeURIComponent(value)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Errore nella richiesta: ${response.status}`);
+    function insertTestValues() {
+        // Generate unique test values
+        const uniquenome = 'Test nome ' + Date.now();
+        const uniqueStato = 'Test Stato ' + Date.now();
+        const uniqueDescrizione = 'Test Descrizione ' + Date.now();
+
+        // Insert the test values into the form
+        document.getElementById('nome').value = uniquenome;
+        document.getElementById('stato').value = uniqueStato;
+        document.getElementById('descrizione').value = uniqueDescrizione;
+
+        // Add 3 test days with 3 "tappe" each
+        for (let i = 1; i <= 3; i++) {
+            addDay();
+            const dayDescrizione = document.getElementById(`day${i}-descrizione`);
+            if (dayDescrizione) {
+                dayDescrizione.value = 'Test Day Descrizione ' + Date.now();
+            }
+
+            for (let j = 1; j <= 3; j++) {
+                addTappa(i);
+                const tappaDiv = document.querySelector(`#day${i}-tappe-container div:nth-child(${j})`);
+                if (tappaDiv) {
+                    const inputs = tappaDiv.querySelectorAll('input[type="text"]');
+                    if (inputs.length >= 4) {
+                        inputs[0].value = 'Test Tappa Descrizione ' + Date.now();
+                        inputs[1].value = 'Test Tappa Luogo ' + getRandomString(10);
+                        inputs[2].value = 'Test Tappa Ristori ' + getRandomString(10);
+                        inputs[3].value = 'Test Tappa Alloggi ' + getRandomString(10);
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    showResult(data, input);
-                })
-                .catch(error => {
-                    console.error(`Errore nella richiesta: ${error.message}`);
-                });
+                }
+            }
+        }
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+
+    let dayCount = 0;
+    let tappaCount = 0;
+
+    function addDay() {
+        dayCount++;
+        const daysContainer = document.getElementById('days-container');
+        const dayDiv = document.createElement('div');
+        dayDiv.innerHTML = `
+    <h2>Day ${dayCount}</h2>
+    <label>
+        Descrizione:
+        <textarea id="day${dayCount}-descrizione" required></textarea>
+    </label>
+    <div id="day${dayCount}-tappe-container">
+        <!-- Tappe will be added here dynamically -->
+    </div>
+    <button type="button" onclick="addTappa(${dayCount})">Add Tappa</button>
+    <button type="button" onclick="deleteDay(this)">Delete Day</button>
+    `;
+        daysContainer.appendChild(dayDiv);
+    }
+
+    function addTappa(day) {
+        tappaCount++;
+        const tappeContainer = document.getElementById(`day${day}-tappe-container`);
+        const tappaDiv = document.createElement('div');
+        tappaDiv.innerHTML = `
+    <h3>Tappa ${tappaCount}</h3>
+    <label>
+        Descrizione:
+        <input type="text" nome="day${day}-tappa${tappaCount}-descrizione" required>
+    </label>
+    <label>
+        Luogo:
+        <input type="text" nome="day${day}-tappa${tappaCount}-luogo" required>
+    </label>
+    <label>
+        Ristori:
+        <input type="text" nome="day${day}-tappa${tappaCount}-ristori" required>
+    </label>
+    <label>
+        Alloggi:
+        <input type="text" nome="day${day}-tappa${tappaCount}-alloggi" required>
+    </label>
+    <button type="button" onclick="moveUp(this)">Move Up</button>
+    <button type="button" onclick="moveDown(this)">Move Down</button>
+    <button type="button" onclick="deleteTappa(this)">Delete Tappa</button>
+    `;
+        tappeContainer.appendChild(tappaDiv);
+
+        // Check if the div contains a "tappa" before adding the class
+        if (tappaDiv.querySelector('h3')) {
+            tappaDiv.classList.add('tappa');
         }
     }
 
-    function showResult(data, input) {
-        const containerDay = input.closest('.container-day');
-        const dropdownContainer = containerDay.querySelector(".dropdown-container");
-        dropdownContainer.innerHTML = "";
+    function deleteDay(button) {
+        const dayDiv = button.parentNode;
+        dayDiv.parentNode.removeChild(dayDiv);
+    }
 
-        data.streets.forEach(result => {
-            const dropdownItem = document.createElement("div");
-            dropdownItem.classList.add(".dropdown-item","hover:bg-gray-300");
-            dropdownItem.textContent = result;
-            dropdownItem.addEventListener("click", () => {
-                input.value = result;
-                hide(input);
+    function deleteTappa(button) {
+        const tappaDiv = button.parentNode;
+        tappaDiv.parentNode.removeChild(tappaDiv);
+    }
+
+    function moveUp(button) {
+        const tappaDiv = button.parentNode;
+        const previousTappaDiv = tappaDiv.previousElementSibling;
+        if (previousTappaDiv) {
+            tappaDiv.parentNode.insertBefore(tappaDiv, previousTappaDiv);
+        }
+    }
+
+    function moveDown(button) {
+        const tappaDiv = button.parentNode;
+        const nextTappaDiv = tappaDiv.nextElementSibling;
+        if (nextTappaDiv) {
+            tappaDiv.parentNode.insertBefore(nextTappaDiv, tappaDiv);
+        }
+    }
+
+    function createJson() {
+        const jsonObject = {
+            nome: document.getElementById('nome').value,
+            stato: document.getElementById('stato').value,
+            descrizione: document.getElementById('descrizione').value,
+            giorni: []
+        };
+
+        // Iterate over the days
+        for (let i = 1; i <= dayCount; i++) {
+            const day = {
+                descrizione: document.getElementById(`day${i}-descrizione`).value,
+                tappe: []
+            };
+
+            // Iterate over the tappe of the current day
+            const tappeContainer = document.getElementById(`day${i}-tappe-container`);
+            const tappeDivs = tappeContainer.querySelectorAll('div.tappa');
+            for (let j = 0; j < tappeDivs.length; j++) {
+                const inputs = tappeDivs[j].querySelectorAll('input[type="text"]');
+                if (inputs.length >= 4) {
+                    const tappa = {
+                        descrizione: inputs[0].value,
+                        luogo: inputs[1].value,
+                        ristori: inputs[2].value,
+                        alloggi: inputs[3].value
+                    };
+                    day.tappe.push(tappa);
+                }
+            }
+
+            jsonObject.giorni.push(day);
+        }
+
+        return jsonObject;
+    }
+
+    document.getElementById('itinerary-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Initialize the JSON object
+        const jsonObject = createJson();
+
+        // Now jsonObject contains the form data as a JSON object
+        console.log(jsonObject);
+
+        fetch('/api/createItinerary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'userId': '65ae9a60b1c0d0c8c09cc34b'
+            },
+            body: JSON.stringify(jsonObject)
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch((error) => {
+                console.error('Error:', error);
             });
-            dropdownContainer.appendChild(dropdownItem);
-        });
 
-        if (data.streets.length === 0) {
-            hide(input)
-        } else {
-            show(input);
-        }
-
-        dropdownContainer.classList.remove("hidden");
-    }
-
-    function show(input) {
-        const containerDay = input.closest('.container-day');
-        const dropdownContainer = containerDay.querySelector(".dropdown-container");
-        dropdownContainer.classList.remove("hidden");
-    }
-
-    function hide(input) {
-        const containerDay = input.closest('.container-day');
-        const dropdownContainer = containerDay.querySelector(".dropdown-container");
-        dropdownContainer.classList.add("hidden");
-    }
+        // Send jsonObject to server...
+    });
 
 </script>
 

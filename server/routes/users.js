@@ -13,9 +13,9 @@ router.get('/myitineraries', requiresAuth(), async function (req, res) {
     });
 });
 
-router.get('/createItinerary', requiresAuth(), function (req, res) {
+router.get('/createItinerary',  function (req, res) {
     res.render('createItinerary', {
-        title: 'Create'
+        title: 'Crea itinerario'
     });
 });
 

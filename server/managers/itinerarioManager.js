@@ -18,7 +18,7 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
         // Estrai il tempo di percorrenza dalla risposta di Google Maps
         const tempoPercorrenza = response.data.routes[0].legs[0].duration.text;
 
-        console.log(`Il tempo di percorrenza da ${start} a ${end} in ${mezzo} è di ${tempoPercorrenza}.`);
+        console.log(response.data.routes[0]);
 
         return tempoPercorrenza;
     } catch (error) {
