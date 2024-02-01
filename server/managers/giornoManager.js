@@ -8,7 +8,7 @@ async function calcolaDistanza(idItinerario, giorno, mezzo) {
         const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({ "_id": new ObjectId(idItinerario) });
         const tappe = itinerario.giorni[giorno].tappe;
         const luoghi = tappe.map(t => t.luogo);
-        const distanza = await tappeManager.calcolaDistanza(luoghi, itinerario.mezzo);
+        const distanza = await tappeManager.calcolaDistanza(luoghi, mezzo);
         return distanza;
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
@@ -21,7 +21,7 @@ async function calcolaPercorso(idItinerario, giorno, mezzo) {
         const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({ "_id": new ObjectId(idItinerario) });
         const tappe = itinerario.giorni[giorno].tappe;
         const luoghi = tappe.map(t => t.luogo);
-        const percorso = await tappeManager.calcolaPercorso(luoghi, itinerario.mezzo);
+        const percorso = await tappeManager.calcolaPercorso(luoghi, mezzo);
         return percorso;
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);

@@ -17,7 +17,7 @@ async function calcolaDistanza(luoghi, mezzo) {
         });
 
         // Estrai la distanza dalla risposta di Google Maps
-        return response.data.rows[0].elements[1].distance.text;
+        return response.data.rows[0].elements[1].distance;
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
         throw error;
@@ -38,7 +38,7 @@ async function calcolaPercorso(luoghi, mezzo) {
             },
         });
 
-        return response.data.routes[0].legs.map((leg) => leg.steps.map((step) => step.html_instructions));
+        return response.data.routes[0].legs.map((leg) => leg.steps.map((step) => step));
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
         throw error;
