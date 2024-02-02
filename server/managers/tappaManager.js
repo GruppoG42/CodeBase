@@ -16,6 +16,8 @@ async function calcolaDistanza(luoghi, mezzo) {
             },
         });
 
+        console.log(response.data)
+
         // Estrai la distanza dalla risposta di Google Maps
         return response.data.rows[0].elements[1].distance;
     } catch (error) {
@@ -25,20 +27,57 @@ async function calcolaDistanza(luoghi, mezzo) {
 }
 
 async function calcolaPercorso(luoghi, mezzo) {
+    if (luoghi.length < 2) {
+        throw new Error("Devi fornire almeno due luoghi per calcolare un percorso.");
+    }
+
     const url = 'https://maps.googleapis.com/maps/api/directions/json';
-
+    const obj = {
+        params: {
+            origin: luoghi[0],
+            destination: luoghi[luoghi.length - 1],
+            waypoints: luoghi.slice(1, -1).join('|'),
+            mode: "driving",
+            key: dbtest.apiKey,
+        },
+    }
     try {
-        const response = await axios.get(url, {
-            params: {
-                origin: luoghi[0],
-                destination: luoghi[luoghi.length - 1],
-                waypoints: luoghi.slice(1, -1).join('|'),
-                mode: mezzo,
-                key: dbtest.apiKey,
-            },
+        const response = await axios.get(url, obj);
+        let totale = 0;
+        response.data.routes[0].legs.forEach(leg => {
+            totale += leg.distance.value;
         });
+        return totale;
+    } catch (error) {
+        console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
+        throw error;
+    }
+}
 
-        return response.data.routes[0].legs.map((leg) => leg.steps.map((step) => step));
+//calcolaTempoPercorrenza
+async function calcolaTempoPercorrenza(luoghi, mezzo) {
+    if (luoghi.length < 2) {
+        throw new Error("Devi fornire almeno due luoghi per calcolare un percorso.");
+    }
+
+    const url = 'https://maps.googleapis.com/maps/api/directions/json';
+    const obj = {
+        params: {
+            origin: luoghi[0],
+            destination: luoghi[luoghi.length - 1],
+            waypoints: luoghi.slice(1, -1).join('|'),
+            mode: mezzo,
+            key: dbtest.apiKey,
+        },
+    }
+    console.log(obj)
+    try {
+        const response = await axios.get(url, obj);
+        let totale = 0;
+        response.data.routes[0].legs.forEach(leg => {
+            totale += leg.duration.value;
+        });
+        return totale;
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
         throw error;
@@ -47,5 +86,6 @@ async function calcolaPercorso(luoghi, mezzo) {
 
 module.exports = {
     calcolaDistanza,
-    calcolaPercorso
+    calcolaPercorso,
+    calcolaTempoPercorrenza
 }

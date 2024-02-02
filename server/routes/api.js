@@ -34,18 +34,11 @@ router.get('/getUserItineraries', async (req, res) => {
 //calc time
 router.get('/calcTimeItinerary', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
-            return;
-        }
-        const startPoint = req.query.startPoint;
-        const endPoint = req.query.endPoint;
-        const mezzo = req.query.mezzo;
-        console.log(startPoint, endPoint, mezzo);
-        const time = await itinerarioManager.calcolaTempoPercorrenza(startPoint, endPoint, mezzo);
+        const idItinerario = req.query.idItinerario;
+        const time = await giornoManager.calcolaTempoPercorrenza(idItinerario);
         res.json(time);
     } catch (error) {
-        res.status(500).send('Internal Server Error: ' + error);
+        res.status(500).send('Internal Server Error ' + error);
     }
 });
 
@@ -348,7 +341,7 @@ router.get('/calcDistance', async (req, res) => {
         const calcolaDistanza = await giornoManager.calcolaDistanza(idItinerario, giorno, mezzo);
         res.json(calcolaDistanza);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
+        res.status(500).send('Internal Server Error ' + error);
     }
 });
 
@@ -357,9 +350,19 @@ router.get('/calcPath', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
         const giorno = req.query.giorno;
-        const mezzo = req.query.mezzo;
-        const calcolaPercorso = await giornoManager.calcolaPercorso(idItinerario, giorno, mezzo);
+        const calcolaPercorso = await giornoManager.calcolaPercorso(idItinerario, giorno);
         res.json(calcolaPercorso);
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+//total path
+router.get('/totalPath', async (req, res) => {
+    try {
+        const idItinerario = req.query.idItinerario;
+        const totalPath = await giornoManager.calcolaPercorsoTotale(idItinerario);
+        res.json(totalPath);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }

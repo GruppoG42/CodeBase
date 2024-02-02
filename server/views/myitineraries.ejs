@@ -79,6 +79,7 @@
 <h1>My Itineraries</h1>
 
 <div id="itineraries"></div>
+<div id="itineraryInfo"></div>
 
 <script>
     async function fetchItineraries() {
@@ -145,6 +146,24 @@
             const itineraryDiv = createItineraryDiv(itinerary);
             itinerariesDiv.appendChild(itineraryDiv);
             addToggleEventListener(itineraryDiv); // Add this line
+
+            // Assuming you have the necessary parameters for the fetch requests
+            const id = itinerary._id;
+            fetch(`/api/totalPath?idItinerario=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('itineraryInfo').innerHTML += `Kilometri totali: ${(data)/1000} km<br>`;
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+
+            fetch(`/api/calcTimeItinerary?idItinerario=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('itineraryInfo').innerHTML += `Tempo totale: ${(data/3600).toFixed(1)} ore<br>`;
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
         });
     });
 
@@ -154,7 +173,6 @@
         toggleButton.classList.add('closed');
         toggleButton.addEventListener('click', () => {
             const days = itineraryDiv.querySelectorAll('.day');
-            console.log(days);
             days.forEach(day => {
                 if (!day.style.display || day.style.display === 'none') {
                     day.style.display = 'block';

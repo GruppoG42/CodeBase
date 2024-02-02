@@ -6,6 +6,7 @@ async function calcolaDistanza(idItinerario, giorno, mezzo) {
     // get tappe
     try {
         const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({ "_id": new ObjectId(idItinerario) });
+        if(!itinerario) throw new Error("Itinerario con id " + idItinerario + " non trovato");
         const tappe = itinerario.giorni[giorno].tappe;
         const luoghi = tappe.map(t => t.luogo);
         const distanza = await tappeManager.calcolaDistanza(luoghi, mezzo);
@@ -15,17 +16,50 @@ async function calcolaDistanza(idItinerario, giorno, mezzo) {
     }
 }
 
-async function calcolaPercorso(idItinerario, giorno, mezzo) {
+async function calcolaPercorso(idItinerario, giorno) {
     // get tappe
     try {
         const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({ "_id": new ObjectId(idItinerario) });
         const tappe = itinerario.giorni[giorno].tappe;
+        const mezzo = itinerario.mezzo ? itinerario.mezzo : "car";
         const luoghi = tappe.map(t => t.luogo);
         const percorso = await tappeManager.calcolaPercorso(luoghi, mezzo);
         return percorso;
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
+}
+
+//totalPath
+async function calcolaPercorsoTotale(idItinerario) {
+    // get tappe
+    try {
+        const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({ "_id": new ObjectId(idItinerario) });
+        const giorni = itinerario.giorni;
+        const mezzo = itinerario.mezzo ? itinerario.mezzo : "car";
+        const luoghiNested = giorni.map(g => g.tappe.map(t => t.luogo));
+        const luoghi = luoghiNested.flat();
+        const percorso = await tappeManager.calcolaPercorso(luoghi, mezzo);
+        return percorso;
+    } catch (error) {
+        throw new Error(`Error updating itinerary: ${error}`);
+    }
+}
+//calcolaTempoPercorrenza
+async function calcolaTempoPercorrenza(idItinerario) {
+    // get tappe
+    try {
+        const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({ "_id": new ObjectId(idItinerario) });
+        const giorni = itinerario.giorni;
+        const mezzo = itinerario.mezzo ? itinerario.mezzo : "car";
+        const luoghiNested = giorni.map(g => g.tappe.map(t => t.luogo));
+        const luoghi = luoghiNested.flat();
+        const tempo = await tappeManager.calcolaTempoPercorrenza(luoghi, mezzo);
+        return tempo;
+    } catch (error) {
+        throw new Error(`Error updating itinerary: ${error}`);
+    }
+
 }
 
 function aggiungiTappa(idItinerario, giorno, tappa) {
@@ -83,5 +117,7 @@ module.exports = {
     aggiungiTappa,
     eliminaTappa,
     eliminaTappaId,
-    ripiazzaTappa
+    ripiazzaTappa,
+    calcolaPercorsoTotale,
+    calcolaTempoPercorrenza
 }
