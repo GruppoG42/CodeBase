@@ -94,35 +94,26 @@ router.get('/containsDay', async (req, res) => {
 //cerca itinerari
 router.get('/searchItineraries', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
-            return;
-        }
-        const parameter = req.query.parameters;
-        switch (parameter) {
-            case 'nome':
-                const nome = req.query.nome;
-                const itinerari = await itinerarioManager.cercaItinerarioPerNome(nome);
-                res.json(itinerari);
-                break;
-            case 'stato':
-                const stato = req.query.stato;
-                const itinerari2 = await itinerarioManager.cercaItinerarioPerStato(stato);
-                res.json(itinerari2);
-                break;
-            case 'durata':
-                const durata = req.query.durata;
-                const itinerari3 = await itinerarioManager.cercaItinerarioPerDurata(durata);
-                res.json(itinerari3);
-                break;
-            default:
-                res.status(400).send('Bad Request: parameter ' + parameter + ' not found');
-                break;
-        }
+        const { state, name, duration } = req.query;
+        const itineraries = await itinerarioManager.cercaItinerari(state, name, duration);
+        res.json(itineraries);
+    } catch (error) {
+        res.status(500).json({ error: error.toString() });
+    }
+});
+
+router.put('/updateActive', async (req, res) => {
+    try {
+        const idItinerario = req.body.idItinerario;
+        const active = req.body.active;
+        const updateActive = await itinerarioManager.aggiornaAttivo(idItinerario, active);
+        res.json(updateActive);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
 });
+
+
 
 // Create a new itinerary
 router.post('/createItinerary', async (req, res) => {
@@ -228,10 +219,10 @@ router.post('/createUser', async (req, res) => {
 // elimina itinerario
 router.delete('/eliminaItinerario', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
-            return;
-        }
+        // if (!checkUser(req)) {
+        //     res.status(401).send('Unauthorized');
+        //     return;
+        // }
         const idItinerario = req.query.idItinerario;
         const eliminaItinerario = await tripplerManager.eliminaItinerario(idItinerario);
         res.json(eliminaItinerario);

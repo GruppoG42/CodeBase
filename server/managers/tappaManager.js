@@ -16,12 +16,11 @@ async function calcolaDistanza(luoghi, mezzo) {
             },
         });
 
-        console.log(response.data)
-
         // Estrai la distanza dalla risposta di Google Maps
         return response.data.rows[0].elements[1].distance;
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
+        console.error("Valori distanza: " + luoghi + " " + mezzo);
         throw error;
     }
 }
@@ -32,12 +31,13 @@ async function calcolaPercorso(luoghi, mezzo) {
     }
 
     const url = 'https://maps.googleapis.com/maps/api/directions/json';
+    //half of the array
     const obj = {
         params: {
             origin: luoghi[0],
             destination: luoghi[luoghi.length - 1],
             waypoints: luoghi.slice(1, -1).join('|'),
-            mode: "driving",
+            // mode: "driving",
             key: dbtest.apiKey,
         },
     }
@@ -50,6 +50,7 @@ async function calcolaPercorso(luoghi, mezzo) {
         return totale;
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
+        console.error("Valori percorso: " + luoghi + " " + mezzo);
         throw error;
     }
 }
@@ -70,7 +71,6 @@ async function calcolaTempoPercorrenza(luoghi, mezzo) {
             key: dbtest.apiKey,
         },
     }
-    console.log(obj)
     try {
         const response = await axios.get(url, obj);
         let totale = 0;

@@ -23,6 +23,7 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
         return tempoPercorrenza;
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
+        console.error("Valori: " + start + " " + end + " " + mezzo);
         throw error;
     }
 }
@@ -30,7 +31,7 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
 function recensisci(idItinerario, recensione, punteggio) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { recensioni: { recensione, punteggio } } });
+        return dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { recensioni: { recensione, punteggio } } });
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
@@ -54,13 +55,30 @@ function contieneGiorno(g, idItinerario) {
     }
 }
 
-function cercaItinerari() {
+function cercaItinerari(state, name, duration) {
     try {
-        return dbtest.dbtest.collection("Itinerario").find().toArray();
+        const query = {attivo: true};
+        if (state) query.stato = { $regex: new RegExp("^" + state), $options: 'i' };
+        if (name) query.nome = { $regex: new RegExp("^" + name), $options: 'i' };
+        if (duration) {
+            query.$expr = { $gte: [ { $size: "$giorni" }, Number(duration) ] };
+        }
+        return dbtest.dbtest.collection("Itinerario").find(query).toArray();
     } catch (error) {
         throw new Error(`Error fetching itineraries: ${error}`);
     }
 }
+
+function aggiornaAttivo(idItinerario, attivo) {
+    try {
+        const objectID = new ObjectId(idItinerario);
+        return dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $set: { attivo } });
+    } catch (error) {
+        throw new Error(`Error updating itinerary: ${error}`);
+    }
+
+}
+
 
 function cercaItinerarioPerNome(nome) {
     try {
@@ -112,5 +130,6 @@ module.exports = {
     cercaItinerarioPerStato,
     cercaItinerarioPerDurata,
     createItinerary,
-    getUserItineraries
+    getUserItineraries,
+    aggiornaAttivo
 }

@@ -73,50 +73,82 @@
         display: none; /* Hide the days by default */
     }
 
-    .toggle-active {
-        padding: 10px 20px; /* Increase the size of the button */
-        color: white; /* Text color */
-        border: none; /* Remove default border */
-        cursor: pointer; /* Change cursor to pointer */
-        transition: background-color 0.3s ease; /* Smooth transition */
+    .form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 10vh; /* Adjust this value as needed */
+        margin: 0; /* Remove default margin */
+        padding: 0; /* Remove default padding */
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
     }
 
-    .delete {
-        padding: 10px 20px; /* Increase the size of the button */
-        color: white; /* Text color */
-        border: none; /* Remove default border */
-        cursor: pointer; /* Change cursor to pointer */
-        transition: background-color 0.3s ease; /* Smooth transition */
+    form {
+        border: 2px solid #000; /* Add a 2px solid black border */
+        padding: 10px; /* Add some padding inside the border */
+        margin-bottom: 20px;
     }
-
-    .toggle-active.activated {
-        background-color: blue; /* Blue when activated */
-    }
-
-    .toggle-active.deactivated {
-        background-color: orange; /* Orange when deactivated */
-    }
-
-    .delete.inactive {
-        background-color: grey; /* Grey when inactive */
-    }
-
-    .delete.active {
-        background-color: purple; /* Purple when active */
-    }
-
 
 </style>
 
-<h1>My Itineraries</h1>
+<h1>Global Itineraries</h1>
+
+<div class="form-container">
+    <form action="/searchItineraries">
+        <label>
+            <input type="text" name="state" placeholder="Search by state">
+        </label>
+        <label>
+            <input type="text" name="name" placeholder="Search by name">
+        </label>
+        <label>
+            <input type="text" name="duration" placeholder="Search by duration">
+        </label>
+    </form>
+</div>
 
 <div id="itineraries"></div>
 <div id="itineraryInfo"></div>
 
+
+
 <script>
+    // Get the input fields
+    const stateInput = document.querySelector('input[name="state"]');
+    const nameInput = document.querySelector('input[name="name"]');
+    const durationInput = document.querySelector('input[name="duration"]');
+
+    // Function to handle search
+    async function handleSearch() {
+        const state = stateInput.value;
+        const name = nameInput.value;
+        const duration = durationInput.value;
+
+        console.log(state, name, duration);
+
+        const response = await fetch(`/api/searchItineraries?state=${state}&name=${name}&duration=${duration}`);
+        const itineraries = await response.json();
+
+        // Clear the current itineraries
+        const itinerariesDiv = document.getElementById('itineraries');
+        itinerariesDiv.innerHTML = '';
+
+        // Add the new itineraries
+        itineraries.forEach(itinerary => {
+            const itineraryDiv = createItineraryDiv(itinerary);
+            itinerariesDiv.appendChild(itineraryDiv);
+            addToggleEventListener(itineraryDiv);
+        });
+    }
+
+    // Add event listeners to the input fields
+    stateInput.addEventListener('input', handleSearch);
+    nameInput.addEventListener('input', handleSearch);
+    durationInput.addEventListener('input', handleSearch);
+
     async function fetchItineraries() {
         try {
-            const response = await fetch('/api/getUserItineraries', {
+            const response = await fetch('/api/searchItineraries', {
                 headers: {
                     'Content-Type': 'application/json',
                     'userId': '65ae9a60b1c0d0c8c09cc34b'
@@ -137,22 +169,20 @@
         itineraryDiv.className = 'itinerary';
         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`
-        const toggleActiveButton = `<button class="toggle-active ${!itinerary.attivo ? 'deactivated' : 'activated'}">${!itinerary.attivo ? 'Disattivato' : 'Attivo'}</button>`
-        const deleteButton = `<button class="delete inactive">Elimina</button>`
-        const totalPathDiv = `<div id="totalPath${itinerary._id}"></div>` 
+        const totalPathDiv = `<div id="totalPath${itinerary._id}"></div>`
         const totalTimeDiv = `<div id="totalTime${itinerary._id}"></div>`
         itineraryDiv.innerHTML = `
     <h2>${itinerary.nome}</h2>
     <p>${itinerary.descrizione}</p>
-    <p>Numero di giorni: ${itinerary.giorni.length}</p>
-    <p>Stato: ${itinerary.stato}</p>
+    <p>Number of days: ${itinerary.giorni.length}</p>
+    <p>State: ${itinerary.stato}</p> <!-- Add this line -->
+    ${button}
     ${totalPathDiv}
     ${totalTimeDiv}
-    ${button}
-    ${toggleActiveButton}
-    ${deleteButton}
     ${itinerary.giorni.map(createDayDiv).join('')}
 `;
+        //press button to toggle days (not event listener)
+
         return itineraryDiv;
     }
 
@@ -184,10 +214,9 @@
         itineraries.forEach(itinerary => {
             const itineraryDiv = createItineraryDiv(itinerary);
             itinerariesDiv.appendChild(itineraryDiv);
-            addToggleEventListener(itineraryDiv); 
-            addToggleActiveEventListener(itineraryDiv, itinerary._id); 
-            addDeleteEventListener(itineraryDiv, itinerary._id);
+            addToggleEventListener(itineraryDiv); // Add this line
 
+            // Assuming you have the necessary parameters for the fetch requests
             document.getElementById(`totalPath${itinerary._id}`).innerHTML = `Kilometri totali:`;
             document.getElementById(`totalTime${itinerary._id}`).innerHTML = `Tempo totale:`;
 
@@ -230,63 +259,4 @@
             });
         });
     }
-
-    function addToggleActiveEventListener(itineraryDiv, itineraryId) {
-        const toggleActiveButton = itineraryDiv.querySelector('.toggle-active');
-        toggleActiveButton.addEventListener('click', () => {
-            // Here you can add the code to update the activation status of the itinerary in your database
-            // After updating the database, update the button text
-            let active = toggleActiveButton.textContent === 'Attivo';
-            if (active) {
-                toggleActiveButton.textContent = 'Disattivato';
-                toggleActiveButton.classList.remove('activated');
-                toggleActiveButton.classList.add('deactivated');
-            } else {
-                toggleActiveButton.textContent = 'Attivo';
-                toggleActiveButton.classList.remove('deactivated');
-                toggleActiveButton.classList.add('activated');
-            }
-
-            const url = `/api/updateActive`
-
-            fetch(url, {
-                method: 'PUT',
-                body: JSON.stringify({idItinerario: itineraryId, active: !active}),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-            });
-
-        });
-    }
-
-    function addDeleteEventListener(itineraryDiv, itineraryId) {
-        const deleteButton = itineraryDiv.querySelector('.delete');
-        deleteButton.addEventListener('click', () => {
-            const url = `/api/eliminaItinerario?idItinerario=${itineraryId}`;
-            fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                } else {
-                    itineraryDiv.remove();
-                    deleteButton.classList.remove('inactive');
-                    deleteButton.classList.add('active');
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    }
-
 </script>

@@ -125,10 +125,7 @@
     }
 
     function insertTestValues() {
-        // Generate unique test values
-        const uniquenome = 'Test nome ' + Date.now();
-        const uniqueStato = 'Italy';
-        const uniqueDescrizione = 'Test Descrizione ' + Date.now();
+
 
         const cityPool = ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Bari', 'Catania',
             'Venice', 'Verona', 'Messina', 'Padua', 'Trieste', 'Taranto', 'Brescia', 'Prato', 'Reggio Calabria', 'Modena',
@@ -136,8 +133,22 @@
             'Udine', 'Bolzano', 'Cagliari', 'Pisa', 'Mantua', 'Lecce', 'La Spezia', 'Pesaro', 'Vicenza', 'Forlì', 'Terni',
             'Bergamo', 'Civitavecchia', 'Foggia', 'Rimini', 'Siracusa', 'Pescara', 'Monza', 'Latina', 'Varese', 'Potenza',
             'Asti', 'Savona', 'Trapani', 'Siena', 'Aosta', 'Crotone', 'Avellino', 'Barletta', 'Sondrio', 'Lodi', 'Cuneo',
-            'Grosseto', 'Cremona', 'Brindisi', 'Pistoia', 'Caserta', 'Alessandria', 'Pisa', 'Lucca', 'Massa', 'Viterbo',
+            'Grosseto', 'Cremona', 'Brindisi', 'Pistoia', 'Caserta', 'Alessandria', 'Pisa', 'Lucca', 'Viterbo',
             'Ascoli Piceno', 'Frosinone', 'Teramo', 'Pordenone', 'Campobasso', 'Isernia', 'Rieti', 'Sassari', 'Nuoro'];
+
+        const namePool = ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Bari', 'Catania',
+            'Venice', 'Verona', 'Messina', 'Padua', 'Trieste', 'Taranto', 'Brescia', 'Prato', 'Reggio Calabria', 'Modena',
+            'Parma', 'Perugia', 'Livorno', 'Ravenna', 'Cosenza', 'Ferrara', 'Salerno', 'Novara', 'Piacenza', 'Ancona', 'Arezzo',
+            'Udine', 'Bolzano', 'Cagliari', 'Pisa', 'Mantua', 'Lecce', 'La Spezia', 'Pesaro', 'Vicenza', 'Forlì', 'Terni',
+            'Bergamo', 'Civitavecchia', 'Foggia', 'Rimini', 'Siracusa', 'Pescara', 'Monza', 'Latina', 'Varese', 'Potenza',
+            'Asti', 'Savona', 'Trapani', 'Siena', 'Aosta', 'Crotone', 'Avellino', 'Barletta', 'Sondrio', 'Lodi', 'Cuneo',
+            'Grosseto', 'Cremona', 'Brindisi', 'Pistoia', 'Caserta', 'Alessandria', 'Pisa', 'Lucca', 'Viterbo',
+            'Ascoli Piceno', 'Frosinone', 'Teramo', 'Pordenone', 'Campobasso', 'Isernia', 'Rieti', 'Sassari', 'Nuoro'];
+
+        // Generate unique test values
+        const uniquenome = namePool[Math.floor(Math.random() * namePool.length)] + ' Itinerary ' + Date.now();
+        const uniqueStato = 'Italy';
+        const uniqueDescrizione = 'Test Descrizione ' + Date.now();
 
         // Insert the test values into the form
         document.getElementById('nome').value = uniquenome;

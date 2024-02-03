@@ -17,6 +17,12 @@ router.get('/createItinerary',  function (req, res) {
     });
 });
 
+router.get('/searchItineraries', async function (req, res) {
+    res.render('searchItineraries', {
+        title: 'Itinerary'
+    });
+});
+
 router.get('/profile', requiresAuth(), function (req, res) {
     res.render('profile', {
         userProfile: JSON.stringify(req.oidc.user, null, 2),
