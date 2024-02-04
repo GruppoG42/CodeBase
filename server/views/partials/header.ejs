@@ -17,14 +17,22 @@
             <% if (locals.user) { %>
                 <a  href="/myitineraries"
                     class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">I miei itinerari</a>
-                <a  href="/profile"
-                class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">Profilo</a>
+                <a  href="/createItinerary"
+                    class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">Crea Itinerario</a>
+                <a  href="/searchItineraries"
+                    class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">Cerca Itinerari</a>
             <% } else { %>
                 <a href="/" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">Home</a>
                 <a  href="/login"
                     class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">Login</a>
             <% } %>
         </div>
+        <% if (locals.user) { %>
+            <div class="flex items-center">
+                <img class="h-8 w-8 rounded-full mr-2" src="<%= user.picture %>" alt="Profile picture">
+                <a href="/profile" class="text-gray-300 hover:text-white">Profilo</a>
+            </div>
+        <% } %>
     </div>
 </nav>
 <div class="flex justify-center py-4">
