@@ -29,8 +29,10 @@
         </div>
         <% if (locals.user) { %>
             <div class="flex items-center">
-                <img class="h-8 w-8 rounded-full mr-2" src="<%= user.picture %>" alt="Profile picture">
-                <a href="/profile" class="text-gray-300 hover:text-white">Profilo</a>
+                <a href="/profile" class="flex items-center text-gray-300 hover:text-white">
+                    <img class="h-8 w-8 rounded-full mr-2" src="<%= user.picture %>" alt="Profile picture">
+                    <span>Profilo</span>
+                </a>
             </div>
         <% } %>
     </div>

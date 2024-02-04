@@ -136,6 +136,22 @@
             const itineraryDiv = createItineraryDiv(itinerary);
             itinerariesDiv.appendChild(itineraryDiv);
             addToggleEventListener(itineraryDiv);
+            const id = itinerary._id;
+            fetch(`/api/totalPath?idItinerario=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById(`totalPath${id}`).innerHTML = `Kilometri totali: ${(data) / 1000} km`; // Update this line
+                }).catch(error => {
+                console.error('Error:', error);
+            });
+
+            fetch(`/api/calcTimeItinerary?idItinerario=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById(`totalTime${id}`).innerHTML = `Tempo totale: ${(data / 3600).toFixed(1)} ore`; // Update this line
+                }).catch(error => {
+                console.error('Error:', error);
+            });
         });
     }
 
