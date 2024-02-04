@@ -119,7 +119,7 @@
             const response = await fetch('/api/getUserItineraries', {
                 headers: {
                     'Content-Type': 'application/json',
-                    'userId': '65ae9a60b1c0d0c8c09cc34b'
+                    'userId': '<%= locals.sid%>'
                 }
             });
             if (!response.ok) {

@@ -1,11 +1,11 @@
 const router = require('express').Router();
-const {requiresAuth} = require('express-openid-connect');
 
 const db = require('../script/dbController.js');
 const itinerarioManager = require('../managers/itinerarioManager.js');
 const giornoManager = require('../managers/giornoManager.js');
 const tappaManager = require('../managers/tappaManager.js');
 const tripplerManager = require('../managers/tripplerManager.js');
+const userManager = require('../managers/userManager.js');
 
 /*
  ***************************************ROUTES***************************************
@@ -17,14 +17,14 @@ const tripplerManager = require('../managers/tripplerManager.js');
 router.get('/getUserItineraries', async (req, res) => {
 // router.get('/getUserItineraries',async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const userId = req.header('userId');
         const userItineraries = await itinerarioManager.getUserItineraries(userId);
-        res.json(userItineraries);
-        res.status(200)
+
+        res.status(200).json(userItineraries);
     } catch (error) {
         console.error('Error fetching user itineraries:', error);
         res.status(500).send('Internal Server Error');
@@ -45,8 +45,8 @@ router.get('/calcTimeItinerary', async (req, res) => {
 //recensisci
 router.post('/reviewItinerary', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.body.idItinerario;
@@ -62,8 +62,8 @@ router.post('/reviewItinerary', async (req, res) => {
 //aggiungi giorno
 router.post('/addDay', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.body.idItinerario;
@@ -78,8 +78,8 @@ router.post('/addDay', async (req, res) => {
 //contiene giorno
 router.get('/containsDay', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.query.idItinerario;
@@ -118,8 +118,8 @@ router.put('/updateActive', async (req, res) => {
 // Create a new itinerary
 router.post('/createItinerary', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const userId = req.header('userId')
@@ -180,8 +180,8 @@ router.post('/createItinerary', async (req, res) => {
 // get user itineraries
 router.get('/getUserItineraries', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const userId = req.header('userId');
@@ -219,10 +219,10 @@ router.post('/createUser', async (req, res) => {
 // elimina itinerario
 router.delete('/eliminaItinerario', async (req, res) => {
     try {
-        // if (!checkUser(req)) {
-        //     res.status(401).send('Unauthorized');
-        //     return;
-        // }
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
         const idItinerario = req.query.idItinerario;
         const eliminaItinerario = await tripplerManager.eliminaItinerario(idItinerario);
         res.json(eliminaItinerario);
@@ -234,8 +234,8 @@ router.delete('/eliminaItinerario', async (req, res) => {
 // visualizza itinerari
 router.get('/visualizzaItinerari', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const userId = req.header('userId');
@@ -253,8 +253,8 @@ router.get('/visualizzaItinerari', async (req, res) => {
 //aggiungi tappa
 router.post('/addStop', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.body.idItinerario;
@@ -270,8 +270,8 @@ router.post('/addStop', async (req, res) => {
 //elimina tappa
 router.delete('/deleteStop', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.body.idItinerario;
@@ -287,8 +287,8 @@ router.delete('/deleteStop', async (req, res) => {
 //elimina tappa id
 router.delete('/deleteStopId', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.body.idItinerario;
@@ -304,8 +304,8 @@ router.delete('/deleteStopId', async (req, res) => {
 //riposiziona tappa
 router.put('/replaceStop', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.body.idItinerario;
@@ -322,8 +322,8 @@ router.put('/replaceStop', async (req, res) => {
 //calcola distanza idItinerario, giorno, mezzo
 router.get('/calcDistance', async (req, res) => {
     try {
-        if (!checkUser(req)) {
-            res.status(401).send('Unauthorized');
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
             return;
         }
         const idItinerario = req.query.idItinerario;
@@ -373,7 +373,7 @@ function checkUser(req) {
         if(!userId) {
             return false;
         }
-        return tripplerManager.checkUser(userId);
+        return userManager.checkUser(userId);
     } catch (error) {
         return false;
     }

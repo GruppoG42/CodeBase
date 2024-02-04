@@ -14,8 +14,6 @@ const apiRouting = require("./routes/api.js");
 
 const app = express()
 
-
-
 // Set views and views engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -38,13 +36,13 @@ if (!config.baseURL && !process.env.BASE_URL && process.env.PORT && process.env.
     config.baseURL = `http://localhost:${port}`;
 }
 
-// app.use(auth(config));
-//
-// // Middleware to make the `user` object available for all views
-// app.use(function (req, res, next) {
-//     res.locals.user = req.oidc.user;
-//     next();
-// });
+app.use(auth(config));
+
+// Middleware to make the `user` object available for all views
+app.use(function (req, res, next) {
+    res.locals.user = req.oidc.user;
+    next();
+});
 
 // Load routes
 app.use('/', indexRouting);
