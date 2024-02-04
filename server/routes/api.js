@@ -189,6 +189,22 @@ router.get('/getUserItineraries', async (req, res) => {
     }
 });
 
+// get all itineraries
+router.get('/getCommunityItineraries', async (req, res) => {
+    try {
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
+        const userId = req.header('userId');
+        const allItineraries = await itinerarioManager.getCommunityItineraries(userId);
+        res.json(allItineraries);
+    } catch (error) {
+        console.error('Error fetching all itineraries:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // END ITINERARY
 
 // TRIPPLER
@@ -244,15 +260,107 @@ router.get('/visualizzaItinerari', async (req, res) => {
 
 router.delete('/deleteUser', async (req, res) => {
     try {
+        const userId = req.header('userId');
+        if (!userId) {
+            res.status(400).send('Bad Request: userId is required');
+            return;
+        }
         if (!(await checkUser(req))) {
             res.status(403).json({ error: 'User not found' });
             return;
         }
-        const userId = req.header('userId');
         const deleteUser = await userManager.deleteUser(userId);
         const itinerari = await itinerarioManager.deleteItineraries(userId);
         res.json({ user: deleteUser, itinerari });
     } catch (error) {
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+router.get('/getSavedItineriesById', async (req, res) => {
+    try {
+        const userId = req.header('userId');
+        if (!userId) {
+            res.status(400).send('Bad Request: userId is required');
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
+        const itineraries = await tripplerManager.getSavedItineriesById(userId);
+        res.status(200).json(itineraries);
+    } catch (error) {
+        console.error(`Error fetching saved itineraries by id: ${error}`);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+router.get('/isSavedItinerary', async (req, res) => {
+    try {
+        const userId = req.header('userId');
+        const itineraryId = req.query.itineraryId;
+        if (!userId || !itineraryId) {
+            res.status(400).send('Bad Request: userId and itineraryId are required');
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
+        const isSaved = await tripplerManager.isSavedItinerary(userId, itineraryId);
+        res.status(200).json(isSaved);
+    } catch (error) {
+        console.error(`Error checking if itinerary is saved: ${error}`);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+router.patch('/addItineraryToSaved', async (req, res) => {
+    try {
+        const userId = req.header('userId');
+        const itineraryId = req.body.itineraryId;
+        if (!userId || !itineraryId) {
+            res.status(400).send('Bad Request: userId and itineraryId are required');
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
+        if (await tripplerManager.isSavedItinerary(userId, itineraryId)) {
+            res.status(400).send('Itinerary already saved');
+            return;
+        }
+        const result = await tripplerManager.addItineraryToSaved(userId, itineraryId);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(`Error adding itinerary to saved: ${error}`);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+router.patch('/removeItineraryFromSaved', async (req, res) => {
+    try {
+        const userId = req.header('userId');
+        const itineraryId = req.body.itineraryId;
+        if (!userId || !itineraryId) {
+            res.status(400).send('Bad Request: userId and itineraryId are required');
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
+        if (!(await tripplerManager.isSavedItinerary(userId, itineraryId))) {
+            console.log(userId, itineraryId)
+            res.status(400).send('Itinerary not saved');
+            return;
+        }
+        const result = await tripplerManager.removeItineraryFromSaved(userId, itineraryId);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(`Error removing itinerary from saved: ${error}`);
         res.status(500).send('Internal Server Error');
     }
 });

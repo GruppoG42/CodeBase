@@ -5,9 +5,23 @@ const db = require('../script/dbController.js');
 /*
  ***************************************ROUTES***************************************
 */
+router.get('/Home', requiresAuth(), async function (req, res) {
+    res.render('itineraries', {
+        title: 'Home',
+        sid: req.oidc.user.sub
+    });
+})
+
 router.get('/myitineraries', requiresAuth(), async function (req, res) {
     res.render('myitineraries', {
         title: 'My itineraries',
+        sid: req.oidc.user.sub
+    });
+});
+
+router.get('/saved', requiresAuth(), async function (req, res) {
+    res.render('saved', {
+        title: 'Saved itineraries',
         sid: req.oidc.user.sub
     });
 });

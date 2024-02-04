@@ -28,6 +28,7 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
     }
 }
 
+
 function recensisci(idItinerario, recensione, punteggio) {
     try {
         const objectID = new ObjectId(idItinerario);
@@ -120,6 +121,15 @@ function getUserItineraries(userId) {
     }
 }
 
+function getCommunityItineraries(id) {
+    try {
+        return dbtest.dbtest.collection("Itinerario").find({ "_userId": { $ne: id } }).toArray();
+    }
+    catch (error) {
+        throw new Error(`Error fetching all itineraries: ${error}`);
+    }
+}
+
 function deleteItineraries(userId) {
     try {
         return dbtest.dbtest.collection("Itinerario").deleteMany({ "_userId": userId });
@@ -140,5 +150,6 @@ module.exports = {
     createItinerary,
     getUserItineraries,
     aggiornaAttivo,
-    deleteItineraries
+    deleteItineraries,
+    getCommunityItineraries
 }
