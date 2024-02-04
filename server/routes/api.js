@@ -246,6 +246,21 @@ router.get('/visualizzaItinerari', async (req, res) => {
     }
 });
 
+router.delete('/deleteUser', async (req, res) => {
+    try {
+        if (!(await checkUser(req))) {
+            res.status(403).json({ error: 'User not found' });
+            return;
+        }
+        const userId = req.header('userId');
+        const deleteUser = await userManager.deleteUser(userId);
+        const itinerari = await itinerarioManager.deleteItineraries(userId);
+        res.json({ user: deleteUser, itinerari });
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // END TRIPPLER
 
 // DAY

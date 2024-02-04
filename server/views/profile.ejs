@@ -17,4 +17,48 @@
     <a class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href="/logout">Logout</a>
 </p>
 
+<!-- Add delete account button -->
+<p class="py-3">
+    <button id="delete-account" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete Account</button>
+</p>
+
+<!-- Add confirmation form -->
+<div id="confirmation-form" style="display: none;">
+    <p>Are you sure you want to delete your account?</p>
+    <form action="/delete-account">
+        <input type="hidden" name="userId" value="<%= user.id %>">
+        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Yes, delete my account</button>
+        <button type="button" id="cancel-delete" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Cancel</button>
+    </form>
+</div>
+
 <%- include('partials/footer') -%>
+
+<script>
+    document.getElementById('delete-account').addEventListener('click', async function() {
+        if (confirm('Are you sure you want to delete your account?')) {
+            try {
+                const response = await fetch('/api/deleteUser', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'userId': '<%= sid %>'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Redirect to login page or show a message
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error deleting account:', error);
+            }
+        }
+    });
+
+    document.getElementById('cancel-delete').addEventListener('click', function() {
+        document.getElementById('confirmation-form').style.display = 'none';
+    });
+</script>

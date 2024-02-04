@@ -120,6 +120,14 @@ function getUserItineraries(userId) {
     }
 }
 
+function deleteItineraries(userId) {
+    try {
+        return dbtest.dbtest.collection("Itinerario").deleteMany({ "_userId": userId });
+    } catch (error) {
+        throw new Error(`Error deleting itinerary: ${error}`);
+    }
+}
+
 module.exports = {
     calcolaTempoPercorrenza,
     recensisci,
@@ -131,5 +139,6 @@ module.exports = {
     cercaItinerarioPerDurata,
     createItinerary,
     getUserItineraries,
-    aggiornaAttivo
+    aggiornaAttivo,
+    deleteItineraries
 }

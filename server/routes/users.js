@@ -28,7 +28,8 @@ router.get('/searchItineraries', async function (req, res) {
 router.get('/profile', requiresAuth(), function (req, res) {
     res.render('profile', {
         userProfile: JSON.stringify(req.oidc.user, null, 2),
-        title: 'Profile page'
+        title: 'Profile page',
+        sid: req.oidc.user.sub
     });
 });
 
