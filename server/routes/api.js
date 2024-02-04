@@ -130,17 +130,14 @@ router.post('/createItinerary', async (req, res) => {
         const descrizione = req.body.descrizione;
         let attivo = req.body.attivo;
         if(!nome) {
-            console.log("nome")
             res.status(400).send('Bad Request: nome is required');
             return;
         }
         if(!stato) {
-            console.log("stato")
             res.status(400).send('Bad Request: stato is required');
             return;
         }
         if(!giorni) {
-            console.log("giorni")
             res.status(400).send('Bad Request: giorni is required');
             return;
         }
@@ -148,7 +145,6 @@ router.post('/createItinerary', async (req, res) => {
             recensioni = [];
         }
         if(!descrizione) {
-            console.log("descrizione")
             res.status(400).send('Bad Request: descrizione is required');
             return;
         }

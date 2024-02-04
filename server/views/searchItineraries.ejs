@@ -124,8 +124,6 @@
         const name = nameInput.value;
         const duration = durationInput.value;
 
-        console.log(state, name, duration);
-
         const response = await fetch(`/api/searchItineraries?state=${state}&name=${name}&duration=${duration}`);
         const itineraries = await response.json();
 

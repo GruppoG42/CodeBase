@@ -19,9 +19,7 @@ const managerClient = new ManagementClient({
 async function deleteUser(id) {
     try {
         // const user = await managerClient.getUser({ id: id });
-        console.log('Deleting user:', id);
         const user = await managerClient.users.delete({id: id});
-        console.log('User:', user);
         return user;
     } catch (error) {
         console.error('Error deleting user:', error);
@@ -33,7 +31,6 @@ async function checkUser(id) {
     try {
         // const user = await managerClient.getUser({ id: id });
         const user = await managerClient.users.get({id: id});
-        console.log('User:', user);
         // return !!user; // Returns true if user exists, false otherwise
         return user !== undefined;
     } catch (error) {
