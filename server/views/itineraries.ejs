@@ -201,7 +201,6 @@
             }
         }).then(review => {
             if (review && review.recensione) {
-                console.log(review);
                 reviewForm.querySelector('textarea[name="reviewText"]').value = review.recensione;
                 reviewForm.querySelector('select[name="rating"]').value = review.punteggio;
                 reviewForm.style.display = 'block';
@@ -220,13 +219,13 @@
 
             // Aggiorna la recensione sul server
             const idItinerario = itinerary._id;
-            const response = await fetch(`/api/reviewItinerary?idItinerario=${idItinerario}`, {
+            const response = await fetch(`/api/reviewItinerary`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'userId': '<%= locals.sid %>'
                 },
-                body: JSON.stringify({reviewText, rating}),
+                body: JSON.stringify({idItinerario, reviewText, rating}),
             });
 
             if (!response.ok) {

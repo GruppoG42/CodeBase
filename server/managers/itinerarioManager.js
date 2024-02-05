@@ -133,7 +133,14 @@ async function saveReview(idItinerario, userId, recensione, punteggio) {
     try {
         const objectID = new ObjectId(idItinerario);
         //delete old possible review
-        await dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {$pull: {recensioni: {"_userId": userId}}});
+        console.log("idItinerario: " + idItinerario + " userId: " + userId + " recensione: " + recensione + " punteggio: " + punteggio);
+        await dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {
+            $pull: {
+                recensioni: {
+                    _userId: userId
+                }
+            }
+        });
         return dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {
             $push: {
                 recensioni: {
