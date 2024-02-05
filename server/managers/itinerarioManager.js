@@ -29,40 +29,31 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
 }
 
 
-function recensisci(idItinerario, recensione, punteggio) {
+async function aggiungiGiorno(g, idItinerario) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { recensioni: { recensione, punteggio } } });
+        return dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {$push: {giorni: g}});
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
 }
 
-function aggiungiGiorno(g, idItinerario) {
+async function contieneGiorno(g, idItinerario) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $push: { giorni: g } });
+        return dbtest.dbtest.collection("Itinerario").findOne({"_id": objectID, "giorni": g});
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
 }
 
-function contieneGiorno(g, idItinerario) {
-    try {
-        const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").findOne({ "_id": objectID, "giorni": g });
-    } catch (error) {
-        throw new Error(`Error updating itinerary: ${error}`);
-    }
-}
-
-function cercaItinerari(state, name, duration) {
+async function cercaItinerari(state, name, duration) {
     try {
         const query = {attivo: true};
-        if (state) query.stato = { $regex: new RegExp("^" + state), $options: 'i' };
-        if (name) query.nome = { $regex: new RegExp("^" + name), $options: 'i' };
+        if (state) query.stato = {$regex: new RegExp("^" + state), $options: 'i'};
+        if (name) query.nome = {$regex: new RegExp("^" + name), $options: 'i'};
         if (duration) {
-            query.$expr = { $gte: [ { $size: "$giorni" }, Number(duration) ] };
+            query.$expr = {$gte: [{$size: "$giorni"}, Number(duration)]};
         }
         return dbtest.dbtest.collection("Itinerario").find(query).toArray();
     } catch (error) {
@@ -70,42 +61,17 @@ function cercaItinerari(state, name, duration) {
     }
 }
 
-function aggiornaAttivo(idItinerario, attivo) {
+async function aggiornaAttivo(idItinerario, attivo) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({ "_id": objectID }, { $set: { attivo } });
+        return dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {$set: {attivo}});
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
-
 }
 
 
-function cercaItinerarioPerNome(nome) {
-    try {
-        return dbtest.dbtest.collection("Itinerario").find({ "nome": nome }).toArray();
-    } catch (error) {
-        throw new Error(`Error fetching itineraries: ${error}`);
-    }
-}
-
-function cercaItinerarioPerStato(stato) {
-    try {
-        return dbtest.dbtest.collection("Itinerario").find({ "stato": stato }).toArray();
-    } catch (error) {
-        throw new Error(`Error fetching itineraries: ${error}`);
-    }
-}
-
-function cercaItinerarioPerDurata(durata) {
-    try {
-        return dbtest.dbtest.collection("Itinerario").find({ "durata": durata }).toArray();
-    } catch (error) {
-        throw new Error(`Error fetching itineraries: ${error}`);
-    }
-}
-
-function createItinerary(itineraryData) {
+async function createItinerary(itineraryData) {
     try {
         return dbtest.dbtest.collection("Itinerario").insertOne(itineraryData);
     } catch (error) {
@@ -113,43 +79,85 @@ function createItinerary(itineraryData) {
     }
 }
 
-function getUserItineraries(userId) {
+async function getUserItineraries(userId) {
     try {
-        return dbtest.dbtest.collection("Itinerario").find({ "_userId": userId }).toArray();
+        return dbtest.dbtest.collection("Itinerario").find({"_userId": userId}).toArray();
     } catch (error) {
         throw new Error(`Error fetching user itineraries: ${error}`);
     }
 }
 
-function getCommunityItineraries(id) {
+async function getCommunityItineraries(id) {
     try {
-        return dbtest.dbtest.collection("Itinerario").find({ "_userId": { $ne: id } }).toArray();
-    }
-    catch (error) {
+        return dbtest.dbtest.collection("Itinerario").find({"_userId": {$ne: id}}).toArray();
+    } catch (error) {
         throw new Error(`Error fetching all itineraries: ${error}`);
     }
 }
 
-function deleteItineraries(userId) {
+async function test() {
+    return "1";
+}
+
+async function deleteItineraries(userId) {
     try {
-        return dbtest.dbtest.collection("Itinerario").deleteMany({ "_userId": userId });
+        return dbtest.dbtest.collection("Itinerario").deleteMany({"_userId": userId});
     } catch (error) {
         throw new Error(`Error deleting itinerary: ${error}`);
     }
 }
 
+async function getItineraryReview(idItinerario, userId) {
+    try {
+        console.log("idItinerario: " + idItinerario);
+        console.log("userId: " + userId);
+        const objectID = new ObjectId(idItinerario);
+        const itinerary = await dbtest.dbtest.collection("Itinerario").findOne({
+            "_id": objectID
+        });
+
+        for (let review of itinerary.recensioni) {
+            if (review._userId === userId) {
+                return review;
+            }
+        }
+
+        return null;
+    } catch (error) {
+        console.log(error);
+        throw new Error(`Error fetching itinerary review: ${error}`);
+    }
+}
+
+async function saveReview(idItinerario, userId, recensione, punteggio) {
+    try {
+        const objectID = new ObjectId(idItinerario);
+        //delete old possible review
+        await dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {$pull: {recensioni: {"_userId": userId}}});
+        return dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {
+            $push: {
+                recensioni: {
+                    _userId: userId,
+                    recensione,
+                    punteggio
+                }
+            }
+        });
+    } catch (error) {
+        throw new Error(`Error saving review: ${error}`);
+    }
+}
+
 module.exports = {
     calcolaTempoPercorrenza,
-    recensisci,
     aggiungiGiorno,
     contieneGiorno,
     cercaItinerari,
-    cercaItinerarioPerNome,
-    cercaItinerarioPerStato,
-    cercaItinerarioPerDurata,
     createItinerary,
     getUserItineraries,
     aggiornaAttivo,
     deleteItineraries,
-    getCommunityItineraries
+    getCommunityItineraries,
+    getItineraryReview,
+    saveReview
 }

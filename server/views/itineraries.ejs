@@ -145,7 +145,7 @@
             const response = await fetch('/api/getCommunityItineraries', {
                 headers: {
                     'Content-Type': 'application/json',
-                    'userId': '<%= locals.sid%>'
+                    'userId': '<%= locals.sid %>'
                 }
             });
             if (!response.ok) {
@@ -158,7 +158,7 @@
                 const isSavedResponse = await fetch(`/api/isSavedItinerary?itineraryId=${itinerary._id}`, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'userId': '<%= locals.sid%>'
+                        'userId': '<%= locals.sid %>'
                     }
                 });
                 if (!isSavedResponse.ok) {
@@ -166,7 +166,6 @@
                 }
                 const isSavedData = await isSavedResponse.json();
                 itinerary.isSaved = isSavedData;
-                console.log(itinerary);
             }
 
             return itineraries;
@@ -175,15 +174,99 @@
         }
     }
 
+    function createReviewForm(itinerary) {
+        const reviewForm = document.createElement('form');
+        reviewForm.innerHTML = `
+        <label>
+            <textarea name="reviewText" placeholder="Scrivi la tua recensione..."></textarea>
+        </label>
+        <label>
+            Valutazione:
+            <select name="rating">
+                ${[1, 2, 3, 4, 5].map(star => `<option value="${star}">${star}</option>`).join('')}
+            </select>
+        </label>
+        <button type="submit">Salva recensione</button>
+    `;
+
+        // Fetch the review from the server
+        fetch(`/api/getItineraryReview?idItinerario=${itinerary._id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'userId': '<%= locals.sid %>'
+            }
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+        }).then(review => {
+            if (review && review.recensione) {
+                console.log(review);
+                reviewForm.querySelector('textarea[name="reviewText"]').value = review.recensione;
+                reviewForm.querySelector('select[name="rating"]').value = review.punteggio;
+                reviewForm.style.display = 'block';
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+
+
+        reviewForm.style.display = 'none';
+
+        reviewForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const reviewText = reviewForm.querySelector('textarea[name="reviewText"]').value;
+            const rating = reviewForm.querySelector('select[name="rating"]').value;
+
+            // Aggiorna la recensione sul server
+            const idItinerario = itinerary._id;
+            const response = await fetch(`/api/reviewItinerary?idItinerario=${idItinerario}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'userId': '<%= locals.sid %>'
+                },
+                body: JSON.stringify({reviewText, rating}),
+            });
+
+            if (!response.ok) {
+                console.error('Errore durante l\'aggiornamento della recensione');
+            }
+        });
+
+        return reviewForm;
+    }
+
     function createItineraryDiv(itinerary) {
         const itineraryDiv = document.createElement('div');
         itineraryDiv.className = 'itinerary';
+        //reviews
+
+        const reviewButton = document.createElement('button');
+        reviewButton.textContent = 'Recensisci qua';
+
+        const reviewForm = createReviewForm(itinerary);
+
+        console.log(reviewButton);
+
+        reviewButton.addEventListener('click', () => {
+            console.log("Premuto")
+            console.log(reviewForm.style.display);
+            if (reviewForm.style.display === 'none') {
+                reviewForm.style.display = 'block';
+            }
+        });
+
+        // itineraryDiv.appendChild(reviewButton);
+        // itineraryDiv.appendChild(reviewForm);
+
         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`
         const toggleActiveButton = `<button class="toggle-active ${!itinerary.attivo ? 'deactivated' : 'activated'}">${!itinerary.attivo ? 'Disattivato' : 'Attivo'}</button>`
         const saveButton = itinerary.isSaved ? `<button class="unsave">Unsave</button>` : `<button class="save">Save</button>`;
         const totalPathDiv = `<div id="totalPath${itinerary._id}"></div>`
         const totalTimeDiv = `<div id="totalTime${itinerary._id}"></div>`
+
         itineraryDiv.innerHTML = `
     <h2>${itinerary.nome}</h2>
     <p>${itinerary.descrizione}</p>
@@ -197,15 +280,19 @@
     ${saveButton}
     ${itinerary.giorni.map(createDayDiv).join('')}
 `;
+
+        itineraryDiv.appendChild(reviewButton);
+        itineraryDiv.appendChild(reviewForm);
+
         const saveUnsaveButton = itineraryDiv.querySelector(itinerary.isSaved ? '.unsave' : '.save');
         saveUnsaveButton.addEventListener('click', () => {
             const url = itinerary.isSaved ? '/api/removeItineraryFromSaved' : '/api/addItineraryToSaved';
             fetch(url, {
                 method: 'PATCH',
-                body: JSON.stringify({ itineraryId: itinerary._id }),
+                body: JSON.stringify({itineraryId: itinerary._id}),
                 headers: {
                     'Content-Type': 'application/json',
-                    'userId': '<%= locals.sid%>'
+                    'userId': '<%= locals.sid %>'
                 },
             }).then(response => {
                 if (!response.ok) {

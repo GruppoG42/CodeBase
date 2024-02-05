@@ -178,9 +178,12 @@
         }
     }
 
+
+
     function createItineraryDiv(itinerary) {
         const itineraryDiv = document.createElement('div');
         itineraryDiv.className = 'itinerary';
+
         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`
         const totalPathDiv = `<div id="totalPath${itinerary._id}"></div>`

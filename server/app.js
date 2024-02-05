@@ -30,14 +30,14 @@ const config = {
     baseURL: process.env.BASE_URL,
     clientID: process.env.CLIENT_ID,
     issuerBaseURL: process.env.ISSUER_BASE_URL,
-    authorizationParams: {
-        response_type: "code",
-        scope: "openid profile email",
-        redirect_uri: "https://tripply.onrender.com/callback",
-    },
+    // authorizationParams: {
+    //     response_type: "code",
+    //     scope: "openid profile email",
+    //     redirect_uri: "https://tripply.onrender.com/callback",
+    // },
 };
 
-config.baseURL = "https://tripply.onrender.com";
+// config.baseURL = "https://tripply.onrender.com";
 
 const port = process.env.PORT || 3000;
 if (!config.baseURL && !process.env.BASE_URL && process.env.PORT && process.env.NODE_ENV !== 'production') {
