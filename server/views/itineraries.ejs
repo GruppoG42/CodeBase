@@ -115,19 +115,6 @@
         background-color: #800000; /* Even darker red on hover */
     }
 
-    .review-button {
-        background-color: blue;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .review-button:hover {
-        background-color: darkblue;
-    }
-
     .toggle-active.activated {
         background-color: blue; /* Blue when activated */
     }
@@ -142,6 +129,56 @@
 
     .delete.active {
         background-color: purple; /* Purple when active */
+    }
+
+    .review-form {
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .review-form textarea {
+        width: 100%;
+        min-height: 100px;
+        margin-bottom: 10px;
+    }
+
+    .review-form textarea, .review-form select {
+        border: 1px solid #ddd; /* Add border */
+        padding: 5px; /* Add some padding */
+        border-radius: 5px; /* Optional: add border radius for rounded borders */
+    }
+
+    .review-form select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .review-form button {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .review-form button:hover {
+        background-color: #0056b3;
+    }
+
+    .review-button {
+        padding: 10px 20px; /* Increase the size of the button */
+        color: white; /* Text color */
+        border: none; /* Remove default border */
+        cursor: pointer; /* Change cursor to pointer */
+        transition: background-color 0.3s ease; /* Smooth transition */
+        background-color: #007BFF; /* Blue background */
+    }
+
+    .review-button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
     }
 
 </style>
@@ -187,7 +224,7 @@
         }
     }
 
-    function createReviewForm(itinerary) {
+    function createReviewForm(itinerary, button) {
         const reviewForm = document.createElement('form');
         reviewForm.innerHTML = `
         <label>
@@ -201,6 +238,8 @@
         </label>
         <button type="submit">Salva recensione</button>
     `;
+        reviewForm.className = 'review-form';
+
 
         // Fetch the review from the server
         fetch(`/api/getItineraryReview?idItinerario=${itinerary._id}`, {
@@ -217,6 +256,7 @@
                 reviewForm.querySelector('textarea[name="reviewText"]').value = review.recensione;
                 reviewForm.querySelector('select[name="rating"]').value = review.punteggio;
                 reviewForm.style.display = 'block';
+                button.style.display = 'none';
             }
         }).catch(error => {
             console.error('Error:', error);
@@ -255,19 +295,20 @@
         //reviews
 
         const reviewButton = document.createElement('button');
-        reviewButton.textContent = 'Recensisci qua';
+        reviewButton.textContent = 'Recensisci';
         reviewButton.className = 'review-button';
 
-        const reviewForm = createReviewForm(itinerary);
+        const reviewForm = createReviewForm(itinerary, reviewButton);
+
 
         reviewButton.addEventListener('click', () => {
             if (reviewForm.style.display === 'none') {
                 reviewForm.style.display = 'block';
-            }else if (reviewForm.style.display === 'block'){
-                reviewForm.style.display = 'none';
             }
         });
 
+        // itineraryDiv.appendChild(reviewButton);
+        // itineraryDiv.appendChild(reviewForm);
 
         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`
