@@ -29,10 +29,11 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
 }
 
 
-async function aggiungiGiorno(g, idItinerario) {
+async function aggiungiGiorno(idItinerario, g) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {$push: {giorni: g}});
+        dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {$push: {giorni: g}});
+        return g;
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
@@ -41,8 +42,10 @@ async function aggiungiGiorno(g, idItinerario) {
 async function contieneGiorno(g, idItinerario) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").findOne({"_id": objectID, "giorni": g});
+        const itinerario = await dbtest.dbtest.collection("Itinerario").findOne({"_id": objectID});
+        return itinerario.giorni.length > g;
     } catch (error) {
+        console.log("Error: " + error);
         throw new Error(`Error updating itinerary: ${error}`);
     }
 }
@@ -135,7 +138,7 @@ async function saveReview(idItinerario, userId, recensione, punteggio) {
                 }
             }
         });
-        return dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {
+        dbtest.dbtest.collection("Itinerario").updateOne({"_id": objectID}, {
             $push: {
                 recensioni: {
                     _userId: userId,
@@ -144,6 +147,7 @@ async function saveReview(idItinerario, userId, recensione, punteggio) {
                 }
             }
         });
+        return {review: recensione, rating: punteggio};
     } catch (error) {
         throw new Error(`Error saving review: ${error}`);
     }

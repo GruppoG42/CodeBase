@@ -79,7 +79,8 @@ router.post('/reviewItinerary', async (req, res) => {
         const recensisci = await itinerarioManager.saveReview(idItinerario, userId, recensione, punteggio);
         res.status(200).json(recensisci);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
+        console.error('Error saving review:', error);
+        res.status(500).send('Internal Server Error: ' + error);
     }
 });
 
@@ -102,7 +103,7 @@ router.get('/getItineraryReview', async (req, res) => {
         }
 
         const reviews = await itinerarioManager.getItineraryReview(idItinerario, req.header('userId'));
-        if(!reviews) {
+        if (!reviews) {
             res.json({}); // empty object
             return;
         }
@@ -133,7 +134,8 @@ router.post('/addDay', async (req, res) => {
         const aggiungiGiorno = await itinerarioManager.aggiungiGiorno(idItinerario, giorno);
         res.status(200).json(aggiungiGiorno);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
+        console.error('Error adding day:', error);
+        res.status(500).send('Internal Server Error: ' + error);
     }
 });
 
@@ -159,7 +161,8 @@ router.get('/containsDay', async (req, res) => {
         const contieneGiorno = await itinerarioManager.contieneGiorno(giorno, idItinerario);
         res.status(200).json(contieneGiorno);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
+        console.log(error);
+        res.status(500).send('Internal Server Error: ' + error);
     }
 });
 
@@ -300,7 +303,7 @@ router.get('/getUser', requiresAuth(), async (req, res) => {
 });
 
 
-router.delete('/deleteUser',requiresAuth(), async (req, res) => {
+router.delete('/deleteUser', requiresAuth(), async (req, res) => {
     try {
         const userId = req.oidc.user.sub;
         const deleteUser = await userManager.deleteUser(userId);
@@ -613,8 +616,8 @@ function checkUser(req) {
     }
 }
 
-function checkItinerary(id){
-    try{
+function checkItinerary(id) {
+    try {
         return itinerarioManager.checkItinerary(id);
     } catch (error) {
         return false;
