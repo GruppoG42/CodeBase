@@ -10,7 +10,7 @@ const idItinerario2 = "65bea7fcb410532d3c471d35"
 let createdItineraryId = ""
 
 //userId as header
-describe("Itinerary Tests", () => {
+describe("Itinerary Tests", async () => {
     it("should return all itineraries", async () => {
         return request(host)
             .get("/api/getUserItineraries")
@@ -25,7 +25,7 @@ describe("Itinerary Tests", () => {
         return request(host)
             .get(`/api/calcTimeItinerary`)
             .set('userId', userId)
-            .query({ idItinerario: idItinerario })
+            .query({idItinerario: idItinerario})
             // .expect('Content-Type', /json/)
             .expect(200)
             .then((res) => {
@@ -36,7 +36,7 @@ describe("Itinerary Tests", () => {
         return request(host)
             .post('/api/reviewItinerary')
             .set('userId', userId)
-            .send({ idItinerario: idItinerario, reviewText: 'Great itinerary!', rating: 5 })
+            .send({idItinerario: idItinerario, reviewText: 'Great itinerary!', rating: 5})
             .expect(200)
             .then((res) => {
                 console.log(res.body);
@@ -46,7 +46,7 @@ describe("Itinerary Tests", () => {
         return request(host)
             .get('/api/getItineraryReview')
             .set('userId', userId)
-            .query({ idItinerario: idItinerario })
+            .query({idItinerario: idItinerario})
             .expect(200)
             .then((res) => {
                 console.log(res.body);
@@ -54,7 +54,7 @@ describe("Itinerary Tests", () => {
     });
     //addDay
     it('should add a day to an itinerary', async () => {
-        const json = "{\n" +
+        let json = "{\n" +
             "        \"descrizione\": \"Test Day Descrizione 1706993659036\",\n" +
             "        \"tappe\": [\n" +
             "            {\n" +
@@ -77,10 +77,11 @@ describe("Itinerary Tests", () => {
             "            }\n" +
             "        ]\n" +
             "    }"
+        json = JSON.parse(json)
         return request(host)
             .post('/api/addDay')
             .set('userId', userId)
-            .send({ idItinerario: idItinerario2, giorno: json })
+            .send({idItinerario: idItinerario2, giorno: json})
             .expect(200)
             .then((res) => {
                 console.log(res.body);
@@ -91,7 +92,7 @@ describe("Itinerary Tests", () => {
         return request(host)
             .get('/api/containsDay')
             .set('userId', userId)
-            .query({ idItinerario: idItinerario, giorno: 1 })
+            .query({idItinerario: idItinerario, giorno: 1})
             .expect(200)
             .then((res) => {
                 console.log(res.body);
@@ -102,7 +103,7 @@ describe("Itinerary Tests", () => {
         return request(host)
             .get('/api/searchItineraries')
             .set('userId', userId)
-            .query({ state: "Italy", name: "Rieti", duration: 1 })
+            .query({state: "Italy", name: "Rieti", duration: 1})
             .expect(200)
             .then((res) => {
                 console.log(res.body);
@@ -110,7 +111,7 @@ describe("Itinerary Tests", () => {
     });
     //createItinerary
     it('should create an itinerary', async () => {
-        const json = "{\n" +
+        let json = "{\n" +
             "        \"descrizione\": \"Test Descrizione 1706993659036\",\n" +
             "        \"giorni\": [\n" +
             "            {\n" +
@@ -138,10 +139,18 @@ describe("Itinerary Tests", () => {
             "            }\n" +
             "        ]\n" +
             "    }"
+        json = JSON.parse(json)
         return request(host)
             .post('/api/createItinerary')
             .set('userId', userId)
-            .send({ nome: "Test Itinerario", stato: "Italy", giorni: json, recensioni: [], attivo : true, descrizione: "Test Descrizione " + Date.now() })
+            .send({
+                nome: "Test Itinerario",
+                stato: "Italy",
+                giorni: json,
+                recensioni: [],
+                attivo: true,
+                descrizione: "Test Descrizione " + Date.now()
+            })
             .expect(200)
             .then((res) => {
                 createdItineraryId = res.body.insertedId
@@ -163,7 +172,7 @@ describe("Itinerary Tests", () => {
         return request(host)
             .delete('/api/deleteItinerary')
             .set('userId', userId)
-            .query({ idItinerario: createdItineraryId })
+            .query({idItinerario: createdItineraryId})
             .expect(200)
             .then((res) => {
                 console.log(res.body);
@@ -179,12 +188,136 @@ describe("Itinerary Tests", () => {
                 console.log(res.body);
             })
     });
+    //wait 1s
+    //addItineraryToSaved
+    it('should add an itinerary to saved', async () => {
+        return request(host)
+            .patch('/api/addItineraryToSaved')
+            .set('userId', userId)
+            .send({itineraryId: idItinerario2})
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //isSavedItinerary
+    it('should check if an itinerary is saved', async () => {
+        return request(host)
+            .get('/api/isSavedItinerary')
+            .set('userId', userId)
+            .query({itineraryId: idItinerario2})
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //removeItineraryFromSaved
+    it('should remove an itinerary from saved', async () => {
+        return request(host)
+            .patch('/api/removeItineraryFromSaved')
+            .set('userId', userId)
+            .send({itineraryId: idItinerario2})
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //deleteSavedList
+    it('should delete a saved list', async () => {
+        return request(host)
+            .delete('/api/deleteSavedList')
+            .set('userId', userId)
+            .query({listId: idItinerario2})
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
 
+    //addStop
+    it('should add a stop to an itinerary', async () => {
+        return request(host)
+            .post('/api/addStop')
+            .set('userId', userId)
+            .send({
+                idItinerario: idItinerario2, giorno: 1, tappa: {
+                    "descrizione": "Descrizione della tappa 1",
+                    "giorno": 1,
+                    "luogo": "Milano",
+                    "ristori": "Ristoro 1, Ristoro 2",
+                    "alloggi": "Alloggio 1, Alloggio 2"
+                }
+            })
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //deleteStop
+    it('should delete a stop from an itinerary', async () => {
+        return request(host)
+            .delete('/api/deleteStop')
+            .set('userId', userId)
+            .send({
+                idItinerario: idItinerario2, giorno: 1, tappa: {
+                    "descrizione": "Descrizione della tappa 1",
+                    "giorno": 1,
+                    "luogo": "Milano",
+                    "ristori": "Ristoro 1, Ristoro 2",
+                    "alloggi": "Alloggio 1, Alloggio 2"
+                }
+            })
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //replaceStop
+    it('should replace a stop in an itinerary', async () => {
+        return request(host)
+            .put('/api/replaceStop')
+            .set('userId', userId)
+            .send({
+                idItinerario: idItinerario2, giorno: 1, indice: 0, tappa: {
+                    "descrizione": "Descrizione della tappa 1",
+                    "giorno": 1,
+                    "luogo": "Milano",
+                    "ristori": "Ristoro 1, Ristoro 2",
+                    "alloggi": "Alloggio 1, Alloggio 2"
+                }
+            })
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //calcDistance
+    it('should calculate distance', async () => {
+        return request(host)
+            .get('/api/calcDistance')
+            .set('userId', userId)
+            .query({idItinerario: idItinerario, giorno : 1, mezzo: "car"})
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //calcPath
+    it('should calculate path', async () => {
+        return request(host)
+            .get('/api/calcPath')
+            .set('userId', userId)
+            .query({idItinerario: idItinerario, giorno : 1})
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
 
 });
 
 
-const  s = "" +
+const s = "" +
     "const router = require('express').Router();\n" +
     "\n" +
     "const itinerarioManager = require('../managers/itinerarioManager.js');\n" +

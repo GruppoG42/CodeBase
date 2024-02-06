@@ -54,21 +54,20 @@ async function calcolaTempoPercorrenza(idItinerario) {
         const mezzo = itinerario.mezzo ? itinerario.mezzo : "car";
         const luoghiNested = giorni.map(g => g.tappe.map(t => t.luogo));
         const luoghi = luoghiNested.flat();
-        const tempo = await tappeManager.calcolaTempoPercorrenza(luoghi, mezzo);
-        return tempo;
+        return await tappeManager.calcolaTempoPercorrenza(luoghi, mezzo);
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
-
 }
 
 function aggiungiTappa(idItinerario, giorno, tappa) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({
-            "_id": objectID,
-            "giorni.numero": giorno
-        }, {$push: {"giorni.$.tappe": tappa}});
+        // giorno è un indice, non usare giorno.numero
+        return dbtest.dbtest.collection("Itinerario").updateOne(
+            { "_id": objectID },
+            { $push: { [`giorni.${giorno - 1}.tappe`]: tappa } }
+        );
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
@@ -77,38 +76,32 @@ function aggiungiTappa(idItinerario, giorno, tappa) {
 function eliminaTappa(idItinerario, giorno, tappa) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({
-            "_id": objectID,
-            "giorni.numero": giorno
-        }, {$pull: {"giorni.$.tappe": tappa}});
+        // giorno è un indice, non usare giorno.numero
+        return dbtest.dbtest.collection("Itinerario").updateOne(
+            { "_id": objectID },
+            { $pull: { [`giorni.${giorno - 1}.tappe`]: tappa } }
+        );
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
 }
 
-function eliminaTappaId(idItinerario, giorno, idTappa) {
+async function ripiazzaTappa(idItinerario, giorno, indice, tappa) {
     try {
         const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({
-            "_id": objectID,
-            "giorni.numero": giorno
-        }, {$pull: {"giorni.$.tappe": {"_id": idTappa}}});
+        // First, remove the 'tappa' from its original position
+        await dbtest.dbtest.collection("Itinerario").updateOne(
+            { "_id": objectID },
+            { $pull: { [`giorni.${giorno - 1}.tappe`]: tappa } }
+        );
+        // Then, add the 'tappa' back at the specified position
+        return await dbtest.dbtest.collection("Itinerario").updateOne(
+            { "_id": objectID },
+            { $push: { [`giorni.${giorno - 1}.tappe`]: { $each: [tappa], $position: indice } } }
+        );
     } catch (error) {
         throw new Error(`Error updating itinerary: ${error}`);
     }
-}
-
-function ripiazzaTappa(idItinerario, giorno, indice, tappa) {
-    try {
-        const objectID = new ObjectId(idItinerario);
-        return dbtest.dbtest.collection("Itinerario").updateOne({
-            "_id": objectID,
-            "giorni.numero": giorno
-        }, {$set: {"giorni.$.tappe": tappa}});
-    } catch (error) {
-        throw new Error(`Error updating itinerary: ${error}`);
-    }
-
 }
 
 module.exports = {
@@ -116,7 +109,6 @@ module.exports = {
     calcolaPercorso,
     aggiungiTappa,
     eliminaTappa,
-    eliminaTappaId,
     ripiazzaTappa,
     calcolaPercorsoTotale,
     calcolaTempoPercorrenza

@@ -8,6 +8,10 @@ const userManager = require('../managers/userManager.js');
 const {dbtest} = require("../db/connection");
 const {requiresAuth} = require("express-openid-connect");
 
+const NodeCache = require('node-cache');
+const myCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+
+
 /*
  ***************************************ROUTES***************************************
 */
@@ -352,6 +356,7 @@ router.patch('/addItineraryToSaved', async (req, res) => {
             return;
         }
         if (await tripplerManager.isSavedItinerary(userId, itineraryId)) {
+            console.log("Itinerary already saved: " + userId + " " + itineraryId);
             res.status(400).send('Itinerary already saved');
             return;
         }
@@ -460,62 +465,39 @@ router.delete('/deleteStop', async (req, res) => {
         const eliminaTappa = await giornoManager.eliminaTappa(idItinerario, giorno, tappa);
         res.status(200).json(eliminaTappa);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-//elimina tappa id
-router.delete('/deleteStopId', async (req, res) => {
-    try {
-        const idItinerario = req.body.idItinerario;
-        const giorno = req.body.giorno;
-        const idTappa = req.body.idTappa;
-        const userId = req.header('userId');
-        if (!idItinerario || !giorno || !idTappa || !userId) {
-            res.status(400).send('Bad Request: idItinerario, giorno, idTappa and userId are required');
-            return;
-        }
-        if (!(await checkItinerary(idItinerario))) {
-            res.status(404).json({error: 'Itinerary not found'});
-            return;
-        }
-        if (!(await checkUser(req))) {
-            res.status(404).json({error: 'User not found'});
-            return;
-        }
-
-        const eliminaTappaId = await giornoManager.eliminaTappaId(idItinerario, giorno, idTappa);
-        res.status(200).json(eliminaTappaId);
-    } catch (error) {
-        res.status(500).send('Internal Server Error');
+        console.error('Error deleting stop:', error);
+        res.status(500).send('Internal Server Error: ' + error);
     }
 });
 
 //riposiziona tappa
 router.put('/replaceStop', async (req, res) => {
     try {
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
         const idItinerario = req.body.idItinerario;
         const giorno = req.body.giorno;
         const indice = req.body.indice;
         const tappa = req.body.tappa;
         const userId = req.header('userId');
-        if (!idItinerario || !giorno || !indice || !tappa || !userId) {
+        if (!idItinerario || !giorno || !tappa) {
+            console.error('Bad Request: idItinerario: ' + idItinerario + ' giorno: ' + giorno + ' indice: ' + indice + ' tappa: ' + tappa + ' userId: ' + userId);
             res.status(400).send('Bad Request: idItinerario, giorno, indice, tappa and userId are required');
             return;
         }
         if (!(await checkItinerary(idItinerario))) {
+            console.error('Itinerary not found')
             res.status(404).json({error: 'Itinerary not found'});
-            return;
-        }
-        if (!(await checkUser(req))) {
-            res.status(404).json({error: 'User not found'});
             return;
         }
 
         const ripiazzaTappa = await giornoManager.ripiazzaTappa(idItinerario, giorno, indice, tappa);
         res.status(200).json(ripiazzaTappa);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
+        console.error('Error replacing stop:', error);
+        res.status(500).send('Internal Server Error: ' + error);
     }
 });
 
@@ -595,7 +577,13 @@ function checkUser(req) {
         if (!userId) {
             return false;
         }
-        return userManager.checkUser(userId);
+        if (myCache.has(userId)) {
+            return true;
+        }
+        const user = userManager.checkUser(userId);
+        if (user) {
+            myCache.set(userId, true);
+        }
     } catch (error) {
         return false;
     }
