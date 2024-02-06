@@ -13,7 +13,17 @@ const managerClient = new ManagementClient({
     audience: 'https://tripply.eu.auth0.com/api/v2/'
 });
 
-// requiresAuth() 302 redirect to login page
+
+// getUser
+async function getUser(id) {
+    try {
+        const user = await managerClient.getUser({ id: id });
+        return user;
+    } catch (error) {
+        console.error('Error getting user:', error);
+        throw new Error(`Error getting user: ${error}`);
+    }
+}
 
 //deleteUser
 async function deleteUser(id) {
@@ -42,5 +52,6 @@ async function checkUser(id) {
 
 module.exports = {
     checkUser,
-    deleteUser
+    deleteUser,
+    getUser
 }

@@ -79,13 +79,7 @@ async function createItinerary(itineraryData) {
     }
 }
 
-async function getUserItineraries(userId) {
-    try {
-        return dbtest.dbtest.collection("Itinerario").find({"_userId": userId}).toArray();
-    } catch (error) {
-        throw new Error(`Error fetching user itineraries: ${error}`);
-    }
-}
+
 
 async function getCommunityItineraries(id) {
     try {
@@ -155,16 +149,26 @@ async function saveReview(idItinerario, userId, recensione, punteggio) {
     }
 }
 
+async function checkItinerary(id) {
+    try {
+        const objectID = new ObjectId(id);
+        const itinerary = dbtest.dbtest.collection("Itinerario").findOne({"_id": objectID});
+        return !!itinerary;
+    } catch (error) {
+        throw new Error(`Error fetching itinerary: ${error}`);
+    }
+}
+
 module.exports = {
     calcolaTempoPercorrenza,
     aggiungiGiorno,
     contieneGiorno,
     cercaItinerari,
     createItinerary,
-    getUserItineraries,
     aggiornaAttivo,
     deleteItineraries,
     getCommunityItineraries,
     getItineraryReview,
-    saveReview
+    saveReview,
+    checkItinerary,
 }

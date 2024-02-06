@@ -7,6 +7,7 @@ const tappaManager = require('../managers/tappaManager.js');
 const tripplerManager = require('../managers/tripplerManager.js');
 const userManager = require('../managers/userManager.js');
 const {dbtest} = require("../db/connection");
+const {requiresAuth} = require("express-openid-connect");
 
 /*
  ***************************************ROUTES***************************************
@@ -16,14 +17,17 @@ const {dbtest} = require("../db/connection");
 
 // Get all user itineraries
 router.get('/getUserItineraries', async (req, res) => {
-// router.get('/getUserItineraries',async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+        const userId = req.header('userId');
+        if (!userId) {
+            res.status(400).send('Bad Request: userId are required');
             return;
         }
-        const userId = req.header('userId');
-        const userItineraries = await itinerarioManager.getUserItineraries(userId);
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+        const userItineraries = await tripplerManager.getUserItineraries(userId);
 
         res.status(200).json(userItineraries);
     } catch (error) {
@@ -36,8 +40,16 @@ router.get('/getUserItineraries', async (req, res) => {
 router.get('/calcTimeItinerary', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
+        if (!idItinerario) {
+            res.status(400).send('Bad Request: idItinerario are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
         const time = await giornoManager.calcolaTempoPercorrenza(idItinerario);
-        res.json(time);
+        res.status(200).json(time);
     } catch (error) {
         res.status(500).send('Internal Server Error ' + error);
     }
@@ -46,18 +58,27 @@ router.get('/calcTimeItinerary', async (req, res) => {
 //recensisci
 router.post('/reviewItinerary', async (req, res) => {
     try {
+        const userId = req.header('userId');
+        const idItinerario = req.body.idItinerario;
+        const recensione = req.body.reviewText;
+        const punteggio = req.body.rating;
+        if (!userId || !idItinerario || !recensione || !punteggio) {
+            res.status(400).send('Bad Request: userId, idItinerario, recensione and punteggio are required');
+            return;
+        }
         if (!(await checkUser(req))) {
             console.error('User not found')
-            res.status(403).json({error: 'User not found'});
+            res.status(404).json({error: 'User not found'});
+
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
             return;
         }
 
-        const idItinerario = req.body.idItinerario;
-        const userId = req.header('userId');
-        const recensione = req.body.reviewText;
-        const punteggio = req.body.rating;
         const recensisci = await itinerarioManager.saveReview(idItinerario, userId, recensione, punteggio);
-        res.json(recensisci);
+        res.status(200).json(recensisci);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -65,18 +86,28 @@ router.post('/reviewItinerary', async (req, res) => {
 
 router.get('/getItineraryReview', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            console.error('User not found')
-            res.status(403).json({error: 'User not found'});
+        const userId = req.header('userId');
+        const idItinerario = req.query.idItinerario;
+        if (!userId || !idItinerario) {
+            res.status(400).send('Bad Request: userId and idItinerario are required');
             return;
         }
-        const idItinerario = req.query.idItinerario;
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            console.error('User not found')
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const reviews = await itinerarioManager.getItineraryReview(idItinerario, req.header('userId'));
         if(!reviews) {
             res.json({}); // empty object
             return;
         }
-        res.json(reviews);
+        res.status(200).json(reviews);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -85,14 +116,23 @@ router.get('/getItineraryReview', async (req, res) => {
 //aggiungi giorno
 router.post('/addDay', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.body.idItinerario;
         const giorno = req.body.giorno;
+        if (!idItinerario || !giorno) {
+            res.status(400).send('Bad Request: idItinerario and giorno are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const aggiungiGiorno = await itinerarioManager.aggiungiGiorno(idItinerario, giorno);
-        res.json(aggiungiGiorno);
+        res.status(200).json(aggiungiGiorno);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -101,14 +141,24 @@ router.post('/addDay', async (req, res) => {
 //contiene giorno
 router.get('/containsDay', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.query.idItinerario;
         const giorno = req.query.giorno;
+
+        if (!idItinerario || !giorno) {
+            res.status(400).send('Bad Request: idItinerario and giorno are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const contieneGiorno = await itinerarioManager.contieneGiorno(giorno, idItinerario);
-        res.json(contieneGiorno);
+        res.status(200).json(contieneGiorno);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -118,6 +168,10 @@ router.get('/containsDay', async (req, res) => {
 router.get('/searchItineraries', async (req, res) => {
     try {
         const {state, name, duration} = req.query;
+        if (!state && !name && !duration) {
+            res.status(400).send('Bad Request: state, name or duration are required');
+            return;
+        }
         const itineraries = await itinerarioManager.cercaItinerari(state, name, duration);
         res.json(itineraries);
     } catch (error) {
@@ -140,35 +194,27 @@ router.put('/updateActive', async (req, res) => {
 // Create a new itinerary
 router.post('/createItinerary', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+        const userId = req.header('userId')
+        if (!userId) {
+            res.status(400).send('Bad Request: userId is required');
             return;
         }
-        const userId = req.header('userId')
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
         const nome = req.body.nome;
         const stato = req.body.stato;
         const giorni = req.body.giorni;
         let recensioni = req.body.recensioni;
         const descrizione = req.body.descrizione;
         let attivo = req.body.attivo;
-        if (!nome) {
-            res.status(400).send('Bad Request: nome is required');
-            return;
-        }
-        if (!stato) {
-            res.status(400).send('Bad Request: stato is required');
-            return;
-        }
-        if (!giorni) {
-            res.status(400).send('Bad Request: giorni is required');
+        if (!nome || !stato || !giorni || !descrizione) {
+            res.status(400).send('Bad Request: nome, stato, giorni, and descrizione are required');
             return;
         }
         if (!recensioni) {
             recensioni = [];
-        }
-        if (!descrizione) {
-            res.status(400).send('Bad Request: descrizione is required');
-            return;
         }
         if (!attivo) {
             // console.log("attivo")
@@ -188,25 +234,9 @@ router.post('/createItinerary', async (req, res) => {
             ...itineraryData,
             _userId: userId
         });
-        res.json(newItinerary);
+        res.status(200).json(newItinerary);
     } catch (error) {
         console.error('Error creating new itinerary:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-// get user itineraries
-router.get('/getUserItineraries', async (req, res) => {
-    try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
-        const userId = req.header('userId');
-        const userItineraries = await itinerarioManager.getUserItineraries(userId);
-        res.json(userItineraries);
-    } catch (error) {
-        console.error('Error fetching user itineraries:', error);
         res.status(500).send('Internal Server Error');
     }
 });
@@ -214,13 +244,17 @@ router.get('/getUserItineraries', async (req, res) => {
 // get all itineraries
 router.get('/getCommunityItineraries', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+        const userId = req.header('userId');
+        if (!userId) {
+            res.status(400).send('Bad Request: userId is required');
             return;
         }
-        const userId = req.header('userId');
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
         const allItineraries = await itinerarioManager.getCommunityItineraries(userId);
-        res.json(allItineraries);
+        res.status(200).json(allItineraries);
     } catch (error) {
         console.error('Error fetching all itineraries:', error);
         res.status(500).send('Internal Server Error');
@@ -231,33 +265,23 @@ router.get('/getCommunityItineraries', async (req, res) => {
 
 // TRIPPLER
 
-// Create a new user
-router.post('/createUser', async (req, res) => {
-    try {
-        const userData = req.body;
-        const nome = userData.nome;
-        const cognome = userData.cognome;
-        const email = userData.email;
-        if (!nome || !cognome || !email) {
-            res.status(400).send('Bad Request');
-            return;
-        }
-        const newUser = await tripplerManager.createUser(nome, cognome, email);
-        res.json(newUser);
-    } catch (error) {
-        console.error('Error creating new user:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
 // elimina itinerario
-router.delete('/eliminaItinerario', async (req, res) => {
+router.delete('/deleteItinerary', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+        const userId = req.header('userId');
+        const idItinerario = req.query.idItinerario;
+        if (!userId || !idItinerario) {
+            res.status(400).send('Bad Request: userId and idItinerario are required');
             return;
         }
-        const idItinerario = req.query.idItinerario;
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
         const eliminaItinerario = await tripplerManager.eliminaItinerario(idItinerario);
         res.json(eliminaItinerario);
     } catch (error) {
@@ -265,41 +289,31 @@ router.delete('/eliminaItinerario', async (req, res) => {
     }
 });
 
-// visualizza itinerari
-router.get('/visualizzaItinerari', async (req, res) => {
+//get user
+router.get('/getUser', requiresAuth(), async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
-        const userId = req.header('userId');
-        const itinerari = await tripplerManager.visualizzaItinerari(userId);
-        res.json(itinerari);
+        const userId = req.oidc.user.sub;
+        const user = await userManager.getUser(userId);
+        res.json(user);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
 });
 
-router.delete('/deleteUser', async (req, res) => {
+
+router.delete('/deleteUser',requiresAuth(), async (req, res) => {
     try {
-        const userId = req.header('userId');
-        if (!userId) {
-            res.status(400).send('Bad Request: userId is required');
-            return;
-        }
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
+        const userId = req.oidc.user.sub;
         const deleteUser = await userManager.deleteUser(userId);
-        const itinerari = await itinerarioManager.deleteItineraries(userId);
-        res.json({user: deleteUser, itinerari});
+        const deleteItineraries = await itinerarioManager.deleteItineraries(userId);
+        const deleteSaved = await tripplerManager.deleteSaved(userId);
+        res.json({user: deleteUser, deleteItineraries, deleteSaved});
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
 });
 
-router.get('/getSavedItineriesById', async (req, res) => {
+router.get('/getSavedItineries', async (req, res) => {
     try {
         const userId = req.header('userId');
         if (!userId) {
@@ -307,7 +321,7 @@ router.get('/getSavedItineriesById', async (req, res) => {
             return;
         }
         if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+            res.status(404).json({error: 'User not found'});
             return;
         }
         const itineraries = await tripplerManager.getSavedItineriesById(userId);
@@ -327,7 +341,7 @@ router.get('/isSavedItinerary', async (req, res) => {
             return;
         }
         if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+            res.status(404).json({error: 'User not found'});
             return;
         }
         const isSaved = await tripplerManager.isSavedItinerary(userId, itineraryId);
@@ -347,7 +361,7 @@ router.patch('/addItineraryToSaved', async (req, res) => {
             return;
         }
         if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+            res.status(404).json({error: 'User not found'});
             return;
         }
         if (await tripplerManager.isSavedItinerary(userId, itineraryId)) {
@@ -371,7 +385,7 @@ router.patch('/removeItineraryFromSaved', async (req, res) => {
             return;
         }
         if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
+            res.status(404).json({error: 'User not found'});
             return;
         }
         if (!(await tripplerManager.isSavedItinerary(userId, itineraryId))) {
@@ -387,6 +401,25 @@ router.patch('/removeItineraryFromSaved', async (req, res) => {
     }
 });
 
+router.delete('/deleteSavedList', async (req, res) => {
+    try {
+        const userId = req.header('userId');
+        if (!userId) {
+            res.status(400).send('Bad Request: userId is required');
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+        const result = await tripplerManager.deleteSaved(userId);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(`Error deleting saved list: ${error}`);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // END TRIPPLER
 
 // DAY
@@ -394,15 +427,25 @@ router.patch('/removeItineraryFromSaved', async (req, res) => {
 //aggiungi tappa
 router.post('/addStop', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.body.idItinerario;
         const giorno = req.body.giorno;
         const tappa = req.body.tappa;
+        const userId = req.header('userId');
+        if (!idItinerario || !giorno || !tappa || !userId) {
+            res.status(400).send('Bad Request: idItinerario, giorno, tappa and userId are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const aggiungiTappa = await giornoManager.aggiungiTappa(idItinerario, giorno, tappa);
-        res.json(aggiungiTappa);
+        res.status(200).json(aggiungiTappa);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -411,15 +454,24 @@ router.post('/addStop', async (req, res) => {
 //elimina tappa
 router.delete('/deleteStop', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.body.idItinerario;
         const giorno = req.body.giorno;
         const tappa = req.body.tappa;
+        const userId = req.header('userId');
+        if (!idItinerario || !giorno || !tappa || !userId) {
+            res.status(400).send('Bad Request: idItinerario, giorno, tappa and userId are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
         const eliminaTappa = await giornoManager.eliminaTappa(idItinerario, giorno, tappa);
-        res.json(eliminaTappa);
+        res.status(200).json(eliminaTappa);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -428,15 +480,25 @@ router.delete('/deleteStop', async (req, res) => {
 //elimina tappa id
 router.delete('/deleteStopId', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.body.idItinerario;
         const giorno = req.body.giorno;
         const idTappa = req.body.idTappa;
+        const userId = req.header('userId');
+        if (!idItinerario || !giorno || !idTappa || !userId) {
+            res.status(400).send('Bad Request: idItinerario, giorno, idTappa and userId are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const eliminaTappaId = await giornoManager.eliminaTappaId(idItinerario, giorno, idTappa);
-        res.json(eliminaTappaId);
+        res.status(200).json(eliminaTappaId);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -445,16 +507,26 @@ router.delete('/deleteStopId', async (req, res) => {
 //riposiziona tappa
 router.put('/replaceStop', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.body.idItinerario;
         const giorno = req.body.giorno;
         const indice = req.body.indice;
         const tappa = req.body.tappa;
+        const userId = req.header('userId');
+        if (!idItinerario || !giorno || !indice || !tappa || !userId) {
+            res.status(400).send('Bad Request: idItinerario, giorno, indice, tappa and userId are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const ripiazzaTappa = await giornoManager.ripiazzaTappa(idItinerario, giorno, indice, tappa);
-        res.json(ripiazzaTappa);
+        res.status(200).json(ripiazzaTappa);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -463,25 +535,44 @@ router.put('/replaceStop', async (req, res) => {
 //calcola distanza idItinerario, giorno, mezzo
 router.get('/calcDistance', async (req, res) => {
     try {
-        if (!(await checkUser(req))) {
-            res.status(403).json({error: 'User not found'});
-            return;
-        }
         const idItinerario = req.query.idItinerario;
         const giorno = req.query.giorno;
         const mezzo = req.query.mezzo;
+        const userId = req.header('userId');
+        if (!idItinerario || !giorno || !mezzo || !userId) {
+            res.status(400).send('Bad Request: idItinerario, giorno, mezzo and userId are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+        if (!(await checkUser(req))) {
+            res.status(404).json({error: 'User not found'});
+            return;
+        }
+
         const calcolaDistanza = await giornoManager.calcolaDistanza(idItinerario, giorno, mezzo);
-        res.json(calcolaDistanza);
+        res.status(200).json(calcolaDistanza);
     } catch (error) {
         res.status(500).send('Internal Server Error ' + error);
     }
 });
 
-//calcola percorso idItinerario, giorno mezzo
+//calcola percorso idItinerario, giorno
 router.get('/calcPath', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
         const giorno = req.query.giorno;
+        if (!idItinerario || !giorno) {
+            res.status(400).send('Bad Request: idItinerario and giorno are required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
+
         const calcolaPercorso = await giornoManager.calcolaPercorso(idItinerario, giorno);
         res.json(calcolaPercorso);
     } catch (error) {
@@ -493,8 +584,16 @@ router.get('/calcPath', async (req, res) => {
 router.get('/totalPath', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
+        if (!idItinerario) {
+            res.status(400).send('Bad Request: idItinerario is required');
+            return;
+        }
+        if (!(await checkItinerary(idItinerario))) {
+            res.status(404).json({error: 'Itinerary not found'});
+            return;
+        }
         const totalPath = await giornoManager.calcolaPercorsoTotale(idItinerario);
-        res.json(totalPath);
+        res.status(200).json(totalPath);
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -503,11 +602,6 @@ router.get('/totalPath', async (req, res) => {
 
 // END DAY
 
-// STOP
-
-// END STOP
-
-
 function checkUser(req) {
     try {
         const userId = req.header('userId');
@@ -515,6 +609,14 @@ function checkUser(req) {
             return false;
         }
         return userManager.checkUser(userId);
+    } catch (error) {
+        return false;
+    }
+}
+
+function checkItinerary(id){
+    try{
+        return itinerarioManager.checkItinerary(id);
     } catch (error) {
         return false;
     }

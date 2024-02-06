@@ -115,6 +115,19 @@
         background-color: #800000; /* Even darker red on hover */
     }
 
+    .review-button {
+        background-color: blue;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .review-button:hover {
+        background-color: darkblue;
+    }
+
     .toggle-active.activated {
         background-color: blue; /* Blue when activated */
     }
@@ -243,21 +256,18 @@
 
         const reviewButton = document.createElement('button');
         reviewButton.textContent = 'Recensisci qua';
+        reviewButton.className = 'review-button';
 
         const reviewForm = createReviewForm(itinerary);
 
-        console.log(reviewButton);
-
         reviewButton.addEventListener('click', () => {
-            console.log("Premuto")
-            console.log(reviewForm.style.display);
             if (reviewForm.style.display === 'none') {
                 reviewForm.style.display = 'block';
+            }else if (reviewForm.style.display === 'block'){
+                reviewForm.style.display = 'none';
             }
         });
 
-        // itineraryDiv.appendChild(reviewButton);
-        // itineraryDiv.appendChild(reviewForm);
 
         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`

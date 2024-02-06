@@ -10,14 +10,6 @@ function eliminaItinerario(id) {
     }
 }
 
-function visualizzaItinerari(userId) {
-    try {
-        return dbtest.dbtest.collection("Itinerario").find({"_userId": userId}).toArray();
-    } catch (error) {
-        throw new Error(`Error fetching user itineraries: ${error}`);
-    }
-}
-
 async function getSavedItineriesById(id) {
     const result = await dbtest.dbtest.collection("Salvati").aggregate([
         { $match: { "_id": id } },
@@ -40,6 +32,10 @@ async function getSavedItineriesById(id) {
     const transformedResult = result.map(entry => entry.itinerari_salvati);
     console.log(transformedResult)
     return transformedResult;
+}
+
+async function deleteSaved(id){
+    return dbtest.dbtest.collection("Salvati").deleteOne({"id": id});
 }
 
 async function isSavedItinerary(id, itineraryId) {
@@ -80,13 +76,22 @@ function checkItineraryId(id) {
     }
 }
 
+async function getUserItineraries(userId) {
+    try {
+        return dbtest.dbtest.collection("Itinerario").find({"_userId": userId}).toArray();
+    } catch (error) {
+        throw new Error(`Error fetching user itineraries: ${error}`);
+    }
+}
+
 module.exports = {
+    getUserItineraries,
     eliminaItinerario,
-    visualizzaItinerari,
     getSavedItineriesById,
     addItineraryToSaved,
     removeItineraryFromSaved,
-    isSavedItinerary
+    isSavedItinerary,
+    deleteSaved
 }
 
 

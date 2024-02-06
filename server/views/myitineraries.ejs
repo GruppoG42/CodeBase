@@ -269,7 +269,7 @@
     function addDeleteEventListener(itineraryDiv, itineraryId) {
         const deleteButton = itineraryDiv.querySelector('.delete');
         deleteButton.addEventListener('click', () => {
-            const url = `/api/eliminaItinerario?idItinerario=${itineraryId}`;
+            const url = `/api/deleteItinerary?idItinerario=${itineraryId}`;
             fetch(url, {
                 method: 'DELETE',
                 headers: {
