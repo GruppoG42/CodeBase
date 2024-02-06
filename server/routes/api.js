@@ -1,6 +1,5 @@
 const router = require('express').Router();
 
-const db = require('../script/dbController.js');
 const itinerarioManager = require('../managers/itinerarioManager.js');
 const giornoManager = require('../managers/giornoManager.js');
 const tappaManager = require('../managers/tappaManager.js');

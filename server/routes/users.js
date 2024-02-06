@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const { requiresAuth } = require('express-openid-connect');
-const db = require('../script/dbController.js');
 
 /*
  ***************************************ROUTES***************************************
