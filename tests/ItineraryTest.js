@@ -7,6 +7,7 @@ const host = "http://localhost:3000"
 const userId = "google-oauth2|111261636165234106646"
 const idItinerario = "65bea7f2b410532d3c471d34"
 const idItinerario2 = "65bea7fcb410532d3c471d35"
+let createdItineraryId = ""
 
 //userId as header
 describe("Itinerary Tests", () => {
@@ -70,7 +71,7 @@ describe("Itinerary Tests", () => {
             "            },\n" +
             "            {\n" +
             "                \"descrizione\": \"Test Tappa Descrizione 1706993659036\",\n" +
-            "                \"luogo\": \"Padua\",\n" +
+            "                \"luogo\": \"Padova\",\n" +
             "                \"ristori\": \"Test Tappa Ristori Z1KnV7gMB7\",\n" +
             "                \"alloggi\": \"Test Tappa Alloggi G3VPhFQ6VD\"\n" +
             "            }\n" +
@@ -96,6 +97,90 @@ describe("Itinerary Tests", () => {
                 console.log(res.body);
             })
     });
+    //searchItineraries
+    it('should search itineraries', async () => {
+        return request(host)
+            .get('/api/searchItineraries')
+            .set('userId', userId)
+            .query({ state: "Italy", name: "Rieti", duration: 1 })
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //createItinerary
+    it('should create an itinerary', async () => {
+        const json = "{\n" +
+            "        \"descrizione\": \"Test Descrizione 1706993659036\",\n" +
+            "        \"giorni\": [\n" +
+            "            {\n" +
+            "                \"descrizione\": \"Test Day Descrizione 1706993659036\",\n" +
+            "                \"tappe\": [\n" +
+            "                    {\n" +
+            "                        \"descrizione\": \"Test Tappa Descrizione 1706993659036\",\n" +
+            "                        \"luogo\": \"Bolzano\",\n" +
+            "                        \"ristori\": \"Test Tappa Ristori KqqSwE1ZBd\",\n" +
+            "                        \"alloggi\": \"Test Tappa Alloggi MUpKRNhi8t\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"descrizione\": \"Test Tappa Descrizione 1706993659036\",\n" +
+            "                        \"luogo\": \"Grosseto\",\n" +
+            "                        \"ristori\": \"Test Tappa Ristori q9Z95SjjTz\",\n" +
+            "                        \"alloggi\": \"Test Tappa Alloggi I4c6X9AVT2\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"descrizione\": \"Test Tappa Descrizione 1706993659036\",\n" +
+            "                        \"luogo\": \"Padova\",\n" +
+            "                        \"ristori\": \"Test Tappa Ristori Z1KnV7gMB7\",\n" +
+            "                        \"alloggi\": \"Test Tappa Alloggi G3VPhFQ6VD\"\n" +
+            "                    }\n" +
+            "                ]\n" +
+            "            }\n" +
+            "        ]\n" +
+            "    }"
+        return request(host)
+            .post('/api/createItinerary')
+            .set('userId', userId)
+            .send({ nome: "Test Itinerario", stato: "Italy", giorni: json, recensioni: [], attivo : true, descrizione: "Test Descrizione " + Date.now() })
+            .expect(200)
+            .then((res) => {
+                createdItineraryId = res.body.insertedId
+                console.log(res.body);
+            })
+    });
+    //getCommunityItineraries
+    it('should get community itineraries', async () => {
+        return request(host)
+            .get('/api/getCommunityItineraries')
+            .set('userId', userId)
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //deleteItinerary
+    it('should delete an itinerary', async () => {
+        return request(host)
+            .delete('/api/deleteItinerary')
+            .set('userId', userId)
+            .query({ idItinerario: createdItineraryId })
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+    //getSavedItineraries
+    it('should get saved itineraries', async () => {
+        return request(host)
+            .get('/api/getSavedItineraries')
+            .set('userId', userId)
+            .expect(200)
+            .then((res) => {
+                console.log(res.body);
+            })
+    });
+
+
 });
 
 

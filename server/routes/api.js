@@ -170,28 +170,13 @@ router.get('/containsDay', async (req, res) => {
 router.get('/searchItineraries', async (req, res) => {
     try {
         const {state, name, duration} = req.query;
-        if (!state && !name && !duration) {
-            res.status(400).send('Bad Request: state, name or duration are required');
-            return;
-        }
         const itineraries = await itinerarioManager.cercaItinerari(state, name, duration);
+        console.log(itineraries)
         res.json(itineraries);
     } catch (error) {
         res.status(500).json({error: error.toString()});
     }
 });
-
-router.put('/updateActive', async (req, res) => {
-    try {
-        const idItinerario = req.body.idItinerario;
-        const active = req.body.active;
-        const updateActive = await itinerarioManager.aggiornaAttivo(idItinerario, active);
-        res.json(updateActive);
-    } catch (error) {
-        res.status(500).send('Internal Server Error');
-    }
-});
-
 
 // Create a new itinerary
 router.post('/createItinerary', async (req, res) => {
@@ -315,7 +300,7 @@ router.delete('/deleteUser', requiresAuth(), async (req, res) => {
     }
 });
 
-router.get('/getSavedItineries', async (req, res) => {
+router.get('/getSavedItineraries', async (req, res) => {
     try {
         const userId = req.header('userId');
         if (!userId) {

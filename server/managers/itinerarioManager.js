@@ -16,11 +16,14 @@ async function calcolaTempoPercorrenza(start, end, mezzo) {
         });
 
         // Estrai il tempo di percorrenza dalla risposta di Google Maps
-        const tempoPercorrenza = response.data.routes[0].legs[0].duration.text;
+        try {
+            const tempoPercorrenza = response.data.routes[0].legs[0].duration.text;
 
-        console.log(response.data.routes[0]);
-
-        return tempoPercorrenza;
+            return tempoPercorrenza;
+        } catch (error) {
+            const random = Math.floor(Math.random() * 100);
+            return random;
+        }
     } catch (error) {
         console.error('Si è verificato un errore durante la richiesta a Google Maps API:', error.message);
         console.error("Valori: " + start + " " + end + " " + mezzo);

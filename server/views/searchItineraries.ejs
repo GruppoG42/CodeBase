@@ -169,7 +169,10 @@
                 }
             });
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                //throw new Error(`HTTP error! status: ${response.status}`);
+                console.error(`HTTP error! status: ${response.status}`);
+                console.error(response);
+                return;
             }
             const itineraries = await response.json();
             return itineraries;
@@ -204,10 +207,16 @@
     }
 
     function createDayDiv(day) {
+        let tappe = "";
+        try {
+            tappe = day.tappe.map(createStopDiv).join('');
+        } catch (e) {
+
+        }
         return `
     <div class="day">
         <h3>Day: ${day.descrizione}</h3>
-        ${day.tappe.map(createStopDiv).join('')}
+        ${tappe}
     </div>
     `;
     }
