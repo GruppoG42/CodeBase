@@ -1,5 +1,4 @@
 /**
- * @swagger
  * components:
  *   schemas:
  *     Itinerario:
@@ -1338,8 +1337,14 @@ function checkUser(req) {
             return true;
         }
         const user = userManager.checkUser(userId);
+        // if (user) {
+        //     myCache.set(userId, true);
+        // }
         if (user) {
             myCache.set(userId, true);
+            return true;
+        }else{
+            return false;
         }
     } catch (error) {
         return false;

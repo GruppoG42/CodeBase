@@ -142,7 +142,7 @@
 <script>
     async function fetchItineraries() {
         try {
-            const response = await fetch('/api/getSavedItineries', {
+            const response = await fetch('/api/getSavedItineraries', {
                 headers: {
                     'Content-Type': 'application/json',
                     'userId': '<%= locals.sid%>'
