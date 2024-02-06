@@ -1,3 +1,47 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Itinerario:
+ *       type: object
+ *       properties:
+ *         nome:
+ *           type: string
+ *         stato:
+ *           type: string
+ *         giorni:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               descrizione:
+ *                 type: string
+ *               tappe:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     descrizione:
+ *                       type: string
+ *                     giorno:
+ *                       type: integer
+ *                     luogo:
+ *                       type: string
+ *                     ristori:
+ *                       type: string
+ *                     alloggi:
+ *                       type: string
+ *               type: object
+ *         recensioni:
+ *           type: array
+ *           items:
+ *             type: string
+ *         descrizione:
+ *           type: string
+ *         attivo:
+ *           type: boolean
+ */
+
 const router = require('express').Router();
 
 const itinerarioManager = require('../managers/itinerarioManager.js');
@@ -9,7 +53,7 @@ const {dbtest} = require("../db/connection");
 const {requiresAuth} = require("express-openid-connect");
 
 const NodeCache = require('node-cache');
-const myCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+const myCache = new NodeCache({stdTTL: 60, checkperiod: 120});
 
 
 /*
@@ -19,6 +63,35 @@ const myCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
 //ITINERARY
 
 // Get all user itineraries
+/**
+ * @swagger
+ * /api/getUserItineraries:
+ *  get:
+ *    summary: Get all user itineraries
+ *    description: Get all itineraries created by the user
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    responses:
+ *      '200':
+ *        description: A list of itineraries
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Itinerario'
+ *      '400':
+ *        description: Bad Request, userId is required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/getUserItineraries', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -40,6 +113,29 @@ router.get('/getUserItineraries', async (req, res) => {
 });
 
 //calc time
+/**
+ * @swagger
+ * /api/calcTimeItinerary:
+ *  get:
+ *    summary: Calculate the time for an itinerary
+ *    description: Calculate the time for an itinerary based on the id provided
+ *    parameters:
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *    responses:
+ *      '200':
+ *        description: The calculated time
+ *      '400':
+ *        description: Bad Request, idItinerario is required
+ *      '404':
+ *        description: Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/calcTimeItinerary', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
@@ -59,6 +155,45 @@ router.get('/calcTimeItinerary', async (req, res) => {
 });
 
 //recensisci
+/**
+ * @swagger
+ * /api/reviewItinerary:
+ *  post:
+ *    summary: Add a review to an itinerary
+ *    description: Add a review to an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              idItinerario:
+ *                type: string
+ *              reviewText:
+ *                type: string
+ *              rating:
+ *                type: number
+ *            required:
+ *              - idItinerario
+ *              - reviewText
+ *              - rating
+ *    responses:
+ *      '200':
+ *        description: The review has been added
+ *      '400':
+ *        description: Bad Request, userId, idItinerario, reviewText and rating are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.post('/reviewItinerary', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -88,6 +223,35 @@ router.post('/reviewItinerary', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/getItineraryReview:
+ *  get:
+ *    summary: Get reviews for an itinerary
+ *    description: Get all reviews for an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *    responses:
+ *      '200':
+ *        description: A list of reviews
+ *      '400':
+ *        description: Bad Request, userId and idItinerario are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/getItineraryReview', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -118,6 +282,42 @@ router.get('/getItineraryReview', async (req, res) => {
 });
 
 //aggiungi giorno
+/**
+ * @swagger
+ * /api/addDay:
+ *  post:
+ *    summary: Add a day to an itinerary
+ *    description: Add a day to an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              idItinerario:
+ *                type: string
+ *              giorno:
+ *                type: object
+ *            required:
+ *              - idItinerario
+ *              - giorno
+ *    responses:
+ *      '200':
+ *        description: The day has been added
+ *      '400':
+ *        description: Bad Request, userId, idItinerario and giorno are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.post('/addDay', async (req, res) => {
     try {
         const idItinerario = req.body.idItinerario;
@@ -144,6 +344,41 @@ router.post('/addDay', async (req, res) => {
 });
 
 //contiene giorno
+/**
+ * @swagger
+ * /api/containsDay:
+ *  get:
+ *    summary: Check if a day is in an itinerary
+ *    description: Check if a day is in an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *      - in: query
+ *        name: giorno
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The day
+ *    responses:
+ *      '200':
+ *        description: A boolean indicating if the day is in the itinerary
+ *      '400':
+ *        description: Bad Request, userId, idItinerario and giorno are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/containsDay', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
@@ -171,6 +406,34 @@ router.get('/containsDay', async (req, res) => {
 });
 
 //cerca itinerari
+/**
+ * @swagger
+ * /api/searchItineraries:
+ *  get:
+ *    summary: Search for itineraries
+ *    description: Search for itineraries based on the state, name, and duration
+ *    parameters:
+ *      - in: query
+ *        name: state
+ *        schema:
+ *          type: string
+ *        description: The state
+ *      - in: query
+ *        name: name
+ *        schema:
+ *          type: string
+ *        description: The name
+ *      - in: query
+ *        name: duration
+ *        schema:
+ *          type: string
+ *        description: The duration
+ *    responses:
+ *      '200':
+ *        description: A list of itineraries
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/searchItineraries', async (req, res) => {
     try {
         const {state, name, duration} = req.query;
@@ -183,6 +446,56 @@ router.get('/searchItineraries', async (req, res) => {
 });
 
 // Create a new itinerary
+/**
+ * @swagger
+ * /api/createItinerary:
+ *  post:
+ *    summary: Create a new itinerary
+ *    description: Create a new itinerary with the provided details
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              nome:
+ *                type: string
+ *              stato:
+ *                type: string
+ *              giorni:
+ *                type: array
+ *                items:
+ *                  type: object
+ *              recensioni:
+ *                type: array
+ *                items:
+ *                  type: string
+ *              descrizione:
+ *                type: string
+ *              attivo:
+ *                type: boolean
+ *            required:
+ *              - nome
+ *              - stato
+ *              - giorni
+ *              - descrizione
+ *    responses:
+ *      '200':
+ *        description: The created itinerary
+ *      '400':
+ *        description: Bad Request, userId, nome, stato, giorni, and descrizione are required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.post('/createItinerary', async (req, res) => {
     try {
         const userId = req.header('userId')
@@ -233,6 +546,29 @@ router.post('/createItinerary', async (req, res) => {
 });
 
 // get all itineraries
+/**
+ * @swagger
+ * /api/getCommunityItineraries:
+ *  get:
+ *    summary: Get all community itineraries
+ *    description: Get all itineraries created by the community
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    responses:
+ *      '200':
+ *        description: A list of itineraries
+ *      '400':
+ *        description: Bad Request, userId is required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/getCommunityItineraries', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -257,6 +593,35 @@ router.get('/getCommunityItineraries', async (req, res) => {
 // TRIPPLER
 
 // elimina itinerario
+/**
+ * @swagger
+ * /api/deleteItinerary:
+ *  delete:
+ *    summary: Delete an itinerary
+ *    description: Delete an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *      - in: body
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *    responses:
+ *      '200':
+ *        description: The itinerary has been deleted
+ *      '400':
+ *        description: Bad Request, userId and idItinerario are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.delete('/deleteItinerary', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -281,6 +646,29 @@ router.delete('/deleteItinerary', async (req, res) => {
 });
 
 //get user
+/**
+ * @swagger
+ * /api/getUser:
+ *  get:
+ *    summary: Get user details
+ *    description: Get details of the user based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    responses:
+ *      '200':
+ *        description: User details
+ *      '400':
+ *        description: Bad Request, userId is required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/getUser', requiresAuth(), async (req, res) => {
     try {
         const userId = req.oidc.user.sub;
@@ -291,7 +679,29 @@ router.get('/getUser', requiresAuth(), async (req, res) => {
     }
 });
 
-
+/**
+ * @swagger
+ * /api/deleteUser:
+ *  delete:
+ *    summary: Delete a user
+ *    description: Delete a user based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    responses:
+ *      '200':
+ *        description: The user has been deleted
+ *      '400':
+ *        description: Bad Request, userId is required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.delete('/deleteUser', requiresAuth(), async (req, res) => {
     try {
         const userId = req.oidc.user.sub;
@@ -304,6 +714,29 @@ router.delete('/deleteUser', requiresAuth(), async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/getSavedItineraries:
+ *  get:
+ *    summary: Get saved itineraries for a user
+ *    description: Get all saved itineraries for a user based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    responses:
+ *      '200':
+ *        description: A list of saved itineraries
+ *      '400':
+ *        description: Bad Request, userId is required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/getSavedItineraries', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -323,6 +756,35 @@ router.get('/getSavedItineraries', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/isSavedItinerary:
+ *  get:
+ *    summary: Check if an itinerary is saved by a user
+ *    description: Check if an itinerary is saved by a user based on the user ID and itinerary ID provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *      - in: query
+ *        name: itineraryId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *    responses:
+ *      '200':
+ *        description: A boolean indicating if the itinerary is saved by the user
+ *      '400':
+ *        description: Bad Request, userId and itineraryId are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/isSavedItinerary', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -343,6 +805,39 @@ router.get('/isSavedItinerary', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/addItineraryToSaved:
+ *  patch:
+ *    summary: Add an itinerary to the saved list of a user
+ *    description: Add an itinerary to the saved list of a user based on the user ID and itinerary ID provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              itineraryId:
+ *                type: string
+ *            required:
+ *              - itineraryId
+ *    responses:
+ *      '200':
+ *        description: The itinerary has been added to the saved list
+ *      '400':
+ *        description: Bad Request, userId and itineraryId are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.patch('/addItineraryToSaved', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -368,6 +863,39 @@ router.patch('/addItineraryToSaved', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/removeItineraryFromSaved:
+ *  patch:
+ *    summary: Remove an itinerary from the saved list of a user
+ *    description: Remove an itinerary from the saved list of a user based on the user ID and itinerary ID provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              itineraryId:
+ *                type: string
+ *            required:
+ *              - itineraryId
+ *    responses:
+ *      '200':
+ *        description: The itinerary has been removed from the saved list
+ *      '400':
+ *        description: Bad Request, userId and itineraryId are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.patch('/removeItineraryFromSaved', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -393,6 +921,29 @@ router.patch('/removeItineraryFromSaved', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/deleteSavedList:
+ *  delete:
+ *    summary: Delete the saved list of a user
+ *    description: Delete the saved list of a user based on the user ID provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    responses:
+ *      '200':
+ *        description: The saved list has been deleted
+ *      '400':
+ *        description: Bad Request, userId is required
+ *      '404':
+ *        description: User not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.delete('/deleteSavedList', async (req, res) => {
     try {
         const userId = req.header('userId');
@@ -417,6 +968,45 @@ router.delete('/deleteSavedList', async (req, res) => {
 // DAY
 
 //aggiungi tappa
+/**
+ * @swagger
+ * /api/addStop:
+ *  post:
+ *    summary: Add a stop to a day in an itinerary
+ *    description: Add a stop to a day in an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              idItinerario:
+ *                type: string
+ *              giorno:
+ *                type: object
+ *              tappa:
+ *                type: object
+ *            required:
+ *              - idItinerario
+ *              - giorno
+ *              - tappa
+ *    responses:
+ *      '200':
+ *        description: The stop has been added
+ *      '400':
+ *        description: Bad Request, userId, idItinerario, giorno and tappa are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.post('/addStop', async (req, res) => {
     try {
         const idItinerario = req.body.idItinerario;
@@ -444,6 +1034,47 @@ router.post('/addStop', async (req, res) => {
 });
 
 //elimina tappa
+/**
+ * @swagger
+ * /api/deleteStop:
+ *  delete:
+ *    summary: Delete a stop from a day in an itinerary
+ *    description: Delete a stop from a day in an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *      - in: query
+ *        name: giorno
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The day
+ *      - in: query
+ *        name: tappa
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The stop
+ *    responses:
+ *      '200':
+ *        description: The stop has been deleted
+ *      '400':
+ *        description: Bad Request, userId, idItinerario, giorno and tappa are required
+ *      '404':
+ *        description: User, Itinerary or Stop not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.delete('/deleteStop', async (req, res) => {
     try {
         const idItinerario = req.body.idItinerario;
@@ -471,6 +1102,45 @@ router.delete('/deleteStop', async (req, res) => {
 });
 
 //riposiziona tappa
+/**
+ * @swagger
+ * /api/replaceStop:
+ *  put:
+ *    summary: Replace a stop in a day in an itinerary
+ *    description: Replace a stop in a day in an itinerary based on the id provided
+ *    parameters:
+ *      - in: header
+ *        name: userId
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The user ID
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              idItinerario:
+ *                type: string
+ *              giorno:
+ *                type: object
+ *              tappa:
+ *                type: object
+ *            required:
+ *              - idItinerario
+ *              - giorno
+ *              - tappa
+ *    responses:
+ *      '200':
+ *        description: The stop has been replaced
+ *      '400':
+ *        description: Bad Request, userId, idItinerario, giorno and tappa are required
+ *      '404':
+ *        description: User or Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.put('/replaceStop', async (req, res) => {
     try {
         if (!(await checkUser(req))) {
@@ -502,6 +1172,41 @@ router.put('/replaceStop', async (req, res) => {
 });
 
 //calcola distanza idItinerario, giorno, mezzo
+/**
+ * @swagger
+ * /api/calcDistance:
+ *  get:
+ *    summary: Calculate the distance for a day in an itinerary
+ *    description: Calculate the distance for a day in an itinerary based on the id provided
+ *    parameters:
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *      - in: query
+ *        name: giorno
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The day
+ *      - in: query
+ *        name: mezzo
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The means of transport
+ *    responses:
+ *      '200':
+ *        description: The calculated distance
+ *      '400':
+ *        description: Bad Request, idItinerario, giorno and mezzo are required
+ *      '404':
+ *        description: Itinerary or Day not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/calcDistance', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
@@ -529,6 +1234,35 @@ router.get('/calcDistance', async (req, res) => {
 });
 
 //calcola percorso idItinerario, giorno
+/**
+ * @swagger
+ * /api/calcPath:
+ *  get:
+ *    summary: Calculate the path for a day in an itinerary
+ *    description: Calculate the path for a day in an itinerary based on the id provided
+ *    parameters:
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *      - in: query
+ *        name: giorno
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The day
+ *    responses:
+ *      '200':
+ *        description: The calculated path
+ *      '400':
+ *        description: Bad Request, idItinerario and giorno are required
+ *      '404':
+ *        description: Itinerary or Day not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/calcPath', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;
@@ -550,6 +1284,29 @@ router.get('/calcPath', async (req, res) => {
 });
 
 //total path
+/**
+ * @swagger
+ * /api/totalPath:
+ *  get:
+ *    summary: Calculate the total path for an itinerary
+ *    description: Calculate the total path for an itinerary based on the id provided
+ *    parameters:
+ *      - in: query
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *    responses:
+ *      '200':
+ *        description: The total calculated path
+ *      '400':
+ *        description: Bad Request, idItinerario is required
+ *      '404':
+ *        description: Itinerary not found
+ *      '500':
+ *        description: Internal Server Error
+ */
 router.get('/totalPath', async (req, res) => {
     try {
         const idItinerario = req.query.idItinerario;

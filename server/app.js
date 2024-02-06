@@ -3,9 +3,11 @@ require("./loadEnvironment.js");
 
 const express = require('express')
 const path = require('path');
+const router = express.Router();
+
 
 const logger = require('morgan');
-const { auth } = require('express-openid-connect');
+const {auth} = require('express-openid-connect');
 
 // Routes
 const usersRouting = require("./routes/users.js");
@@ -57,6 +59,38 @@ app.use('/', indexRouting);
 app.use('/', usersRouting);
 app.use('/api', apiRouting);
 app.use(express.json());
+
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const bodyParser = require("body-parser");
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'Itinerary API',
+            description: 'Itinerary API Information',
+            contact: {
+                name: 'Developer'
+            },
+            servers: ['http://localhost:3000']
+        }
+    },
+    apis: ['./routes/users.js', './routes/index.js', `${__dirname}/routes/api.js`]
+    // apis: ['**/*.js'],
+};
+
+function initialize(app) {
+    const swaggerDocs = swaggerJsdoc(swaggerOptions);
+    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
+            explorer: true,
+            customCssUrl:
+                "https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
+        })
+    );
+    console.log("Swagger initialized");
+}
+
+initialize(app);
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
