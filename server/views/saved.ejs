@@ -180,7 +180,6 @@
         itineraryDiv.className = 'itinerary';
         const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const button = `<button name=${randomId} class="toggle closed">Toggle Days</button>`
-        const toggleActiveButton = `<button class="toggle-active ${!itinerary.attivo ? 'deactivated' : 'activated'}">${!itinerary.attivo ? 'Disattivato' : 'Attivo'}</button>`
         const saveButton = itinerary.isSaved ? `<button class="unsave">Unsave</button>` : `<button class="save">Save</button>`;
         const totalPathDiv = `<div id="totalPath${itinerary._id}"></div>`
         const totalTimeDiv = `<div id="totalTime${itinerary._id}"></div>`
@@ -193,7 +192,6 @@
     ${totalPathDiv}
     ${totalTimeDiv}
     ${button}
-    ${toggleActiveButton}
     ${saveButton}
     ${itinerary.giorni.map(createDayDiv).join('')}
 `;
@@ -251,7 +249,6 @@
             const itineraryDiv = createItineraryDiv(itinerary);
             itinerariesDiv.appendChild(itineraryDiv);
             addToggleEventListener(itineraryDiv);
-            addToggleActiveEventListener(itineraryDiv, itinerary._id);
 
             document.getElementById(`totalPath${itinerary._id}`).innerHTML = `Kilometri totali:`;
             document.getElementById(`totalTime${itinerary._id}`).innerHTML = `Tempo totale:`;
@@ -296,40 +293,7 @@
         });
     }
 
-    function addToggleActiveEventListener(itineraryDiv, itineraryId) {
-        const toggleActiveButton = itineraryDiv.querySelector('.toggle-active');
-        toggleActiveButton.addEventListener('click', () => {
-            // Here you can add the code to update the activation status of the itinerary in your database
-            // After updating the database, update the button text
-            let active = toggleActiveButton.textContent === 'Attivo';
-            if (active) {
-                toggleActiveButton.textContent = 'Disattivato';
-                toggleActiveButton.classList.remove('activated');
-                toggleActiveButton.classList.add('deactivated');
-            } else {
-                toggleActiveButton.textContent = 'Attivo';
-                toggleActiveButton.classList.remove('deactivated');
-                toggleActiveButton.classList.add('activated');
-            }
 
-            const url = `/api/updateActive`
-
-            fetch(url, {
-                method: 'PUT',
-                body: JSON.stringify({idItinerario: itineraryId, active: !active}),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-            });
-
-        });
-    }
 
 </script>
 
