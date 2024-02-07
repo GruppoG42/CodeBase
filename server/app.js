@@ -67,8 +67,8 @@ const bodyParser = require("body-parser");
 const swaggerOptions = {
     swaggerDefinition: {
         info: {
-            title: 'Itinerary API',
-            description: 'Itinerary API Information',
+            title: 'Tripply API',
+            description: 'Tripply API Information and Documentation',
             contact: {
                 name: 'Developer'
             },
@@ -76,7 +76,6 @@ const swaggerOptions = {
         }
     },
     apis: ['./routes/users.js', './routes/index.js', `${__dirname}/routes/api.js`]
-    // apis: ['**/*.js'],
 };
 
 function initialize(app) {
