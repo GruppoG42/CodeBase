@@ -442,39 +442,41 @@ router.get('/searchItineraries', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      required: true
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              nome:
- *                type: string
- *              stato:
- *                type: string
- *              giorni:
- *                type: array
- *                items:
- *                  type: object
- *              recensioni:
- *                type: array
- *                items:
- *                  type: string
- *              descrizione:
- *                type: string
- *              attivo:
- *                type: boolean
- *            required:
- *              - nome
- *              - stato
- *              - giorni
- *              - descrizione
+ *      - in: body
+ *        name: nome
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The name of the itinerary
+ *      - in: body
+ *        name: stato
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The state of the itinerary
+ *      - in: body
+ *        name: descrizione
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The description of the itinerary
+ *      - in: body
+ *        name: giorni
+ *        schema:
+ *          type: string
+ *        description: The days of the itinerary as a stringified JSON object
+ *        required: true
+ *      - in: body
+ *        name: recensioni
+ *        schema:
+ *          type: string
+ *        description: The reviews of the itinerary as a stringified JSON array
+ *        required: true
  *    responses:
  *      '200':
  *        description: The created itinerary
  *      '400':
- *        description: Bad Request, userId, nome, stato, giorni, and descrizione are required
+ *        description: Bad Request, userId, nome, stato, descrizione, giorni, recensioni are required
  *      '404':
  *        description: User not found
  *      '500':
@@ -505,9 +507,6 @@ router.post('/createItinerary', async (req, res) => {
             recensioni = [];
         }
         if (!attivo) {
-            // console.log("attivo")
-            // res.status(400).send('Bad Request: attivo is required');
-            // return;
             attivo = true;
         }
         const itineraryData = {
