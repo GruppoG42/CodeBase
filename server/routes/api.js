@@ -55,7 +55,7 @@ const myCache = new NodeCache({stdTTL: 60, checkperiod: 120});
  *            schema:
  *              type: array
  *              items:
- *                  $ref: '#/components/schemas/Itinerario'
+ *                  $ref: 'components/schemas/Itinerario'
  *      '400':
  *        description: Bad Request, userId is required
  *      '404':
@@ -134,6 +134,8 @@ router.get('/calcTimeItinerary', async (req, res) => {
  *    summary: Add a review to an itinerary
  *    description: Add a review to an itinerary based on the id provided
  *    tags: [Itinerario]
+ *    consumes:
+ *      - application/json
  *    parameters:
  *      - in: header
  *        name: userId
@@ -141,22 +143,27 @@ router.get('/calcTimeItinerary', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              idItinerario:
- *                type: string
- *              reviewText:
- *                type: string
- *              rating:
- *                type: number
- *            required:
- *              - idItinerario
- *              - reviewText
- *              - rating
+ *      - in: body
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *        example: "60b3e3e3e4b0e3e3e4b0e3e3"
+ *      - in: body
+ *        name: reviewText
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *        example: "This itinerary is amazing!"
+ *      - in: body
+ *        name: rating
+ *        schema:
+ *          type: number
+ *        required: true
+ *        description: The rating
+ *        example: 5
  *    responses:
  *      '200':
  *        description: The review has been added
@@ -270,20 +277,17 @@ router.get('/getItineraryReview', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      required: true
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              idItinerario:
- *                type: string
- *              giorno:
- *                type: object
- *            required:
- *              - idItinerario
- *              - giorno
+ *      - in: body
+ *        name: body
+ *        description: The details of the day to be added
+ *        required: true
+ *        schema:
+ *          type: object
+ *          properties:
+ *            idItinerario:
+ *              type: string
+ *            giorno:
+ *              type: object
  *    responses:
  *      '200':
  *        description: The day has been added
@@ -805,16 +809,12 @@ router.get('/isSavedItinerary', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              itineraryId:
- *                type: string
- *            required:
- *              - itineraryId
+ *      - in: body
+ *        name: itineraryId
+ *        schema:
+ *         type: string
+ *        required: true
+ *        description: The itinerary ID
  *    responses:
  *      '200':
  *        description: The itinerary has been added to the saved list
@@ -864,16 +864,12 @@ router.patch('/addItineraryToSaved', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              itineraryId:
- *                type: string
- *            required:
- *              - itineraryId
+ *      - in: body
+ *        name: itineraryId
+ *        schema:
+ *         type: string
+ *        required: true
+ *        description: The itinerary ID
  *    responses:
  *      '200':
  *        description: The itinerary has been removed from the saved list
@@ -971,22 +967,24 @@ router.delete('/deleteSavedList', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              idItinerario:
- *                type: string
- *              giorno:
- *                type: object
- *              tappa:
- *                type: object
- *            required:
- *              - idItinerario
- *              - giorno
- *              - tappa
+ *      - in: body
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *      - in: body
+ *        name: giorno
+ *        schema:
+ *          type: object
+ *        required: true
+ *        description: The day
+ *      - in: body
+ *        name: tappa
+ *        schema:
+ *          type: object
+ *        required: true
+ *        description: The stop
  *    responses:
  *      '200':
  *        description: The stop has been added
@@ -1107,22 +1105,24 @@ router.delete('/deleteStop', async (req, res) => {
  *          type: string
  *        required: true
  *        description: The user ID
- *    requestBody:
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              idItinerario:
- *                type: string
- *              giorno:
- *                type: object
- *              tappa:
- *                type: object
- *            required:
- *              - idItinerario
- *              - giorno
- *              - tappa
+ *      - in: body
+ *        name: idItinerario
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The itinerary ID
+ *      - in: body
+ *        name: giorno
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The day
+ *      - in: body
+ *        name: tappa
+ *        schema:
+ *          type: object
+ *        required: true
+ *        description: The stop
  *    responses:
  *      '200':
  *        description: The stop has been replaced
@@ -1339,7 +1339,7 @@ function checkUser(req) {
         if (user) {
             myCache.set(userId, true);
             return true;
-        }else{
+        } else {
             return false;
         }
     } catch (error) {
