@@ -1,44 +1,15 @@
 /**
- * components:
- *   schemas:
- *     Itinerario:
- *       type: object
- *       properties:
- *         nome:
- *           type: string
- *         stato:
- *           type: string
- *         giorni:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               descrizione:
- *                 type: string
- *               tappe:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     descrizione:
- *                       type: string
- *                     giorno:
- *                       type: integer
- *                     luogo:
- *                       type: string
- *                     ristori:
- *                       type: string
- *                     alloggi:
- *                       type: string
- *               type: object
- *         recensioni:
- *           type: array
- *           items:
- *             type: string
- *         descrizione:
- *           type: string
- *         attivo:
- *           type: boolean
+ * @swagger
+ * tags:
+ *  - name: Itinerario
+ *    description: Itinerario API
+ *  - name: Trippler
+ *    description: Trippler API
+ *  - name: Giorno
+ *    description: Giorno API
+ *  - name: Tappa
+ *    description: Tappa API
+ *
  */
 
 const router = require('express').Router();
@@ -68,6 +39,7 @@ const myCache = new NodeCache({stdTTL: 60, checkperiod: 120});
  *  get:
  *    summary: Get all user itineraries
  *    description: Get all itineraries created by the user
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -83,7 +55,7 @@ const myCache = new NodeCache({stdTTL: 60, checkperiod: 120});
  *            schema:
  *              type: array
  *              items:
- *                $ref: '#/components/schemas/Itinerario'
+ *                  $ref: '#/components/schemas/Itinerario'
  *      '400':
  *        description: Bad Request, userId is required
  *      '404':
@@ -118,6 +90,7 @@ router.get('/getUserItineraries', async (req, res) => {
  *  get:
  *    summary: Calculate the time for an itinerary
  *    description: Calculate the time for an itinerary based on the id provided
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: query
  *        name: idItinerario
@@ -160,6 +133,7 @@ router.get('/calcTimeItinerary', async (req, res) => {
  *  post:
  *    summary: Add a review to an itinerary
  *    description: Add a review to an itinerary based on the id provided
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -228,6 +202,7 @@ router.post('/reviewItinerary', async (req, res) => {
  *  get:
  *    summary: Get reviews for an itinerary
  *    description: Get all reviews for an itinerary based on the id provided
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -287,6 +262,7 @@ router.get('/getItineraryReview', async (req, res) => {
  *  post:
  *    summary: Add a day to an itinerary
  *    description: Add a day to an itinerary based on the id provided
+ *    tags: [Giorno]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -295,6 +271,7 @@ router.get('/getItineraryReview', async (req, res) => {
  *        required: true
  *        description: The user ID
  *    requestBody:
+ *      required: true
  *      content:
  *        application/json:
  *          schema:
@@ -349,6 +326,7 @@ router.post('/addDay', async (req, res) => {
  *  get:
  *    summary: Check if a day is in an itinerary
  *    description: Check if a day is in an itinerary based on the id provided
+ *    tags: [Giorno]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -411,6 +389,7 @@ router.get('/containsDay', async (req, res) => {
  *  get:
  *    summary: Search for itineraries
  *    description: Search for itineraries based on the state, name, and duration
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: query
  *        name: state
@@ -451,6 +430,7 @@ router.get('/searchItineraries', async (req, res) => {
  *  post:
  *    summary: Create a new itinerary
  *    description: Create a new itinerary with the provided details
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -459,6 +439,7 @@ router.get('/searchItineraries', async (req, res) => {
  *        required: true
  *        description: The user ID
  *    requestBody:
+ *      required: true
  *      content:
  *        application/json:
  *          schema:
@@ -551,6 +532,7 @@ router.post('/createItinerary', async (req, res) => {
  *  get:
  *    summary: Get all community itineraries
  *    description: Get all itineraries created by the community
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -598,6 +580,7 @@ router.get('/getCommunityItineraries', async (req, res) => {
  *  delete:
  *    summary: Delete an itinerary
  *    description: Delete an itinerary based on the id provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -651,6 +634,7 @@ router.delete('/deleteItinerary', async (req, res) => {
  *  get:
  *    summary: Get user details
  *    description: Get details of the user based on the id provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -684,6 +668,7 @@ router.get('/getUser', requiresAuth(), async (req, res) => {
  *  delete:
  *    summary: Delete a user
  *    description: Delete a user based on the id provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -719,6 +704,7 @@ router.delete('/deleteUser', requiresAuth(), async (req, res) => {
  *  get:
  *    summary: Get saved itineraries for a user
  *    description: Get all saved itineraries for a user based on the id provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -761,6 +747,7 @@ router.get('/getSavedItineraries', async (req, res) => {
  *  get:
  *    summary: Check if an itinerary is saved by a user
  *    description: Check if an itinerary is saved by a user based on the user ID and itinerary ID provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -810,6 +797,7 @@ router.get('/isSavedItinerary', async (req, res) => {
  *  patch:
  *    summary: Add an itinerary to the saved list of a user
  *    description: Add an itinerary to the saved list of a user based on the user ID and itinerary ID provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -868,6 +856,7 @@ router.patch('/addItineraryToSaved', async (req, res) => {
  *  patch:
  *    summary: Remove an itinerary from the saved list of a user
  *    description: Remove an itinerary from the saved list of a user based on the user ID and itinerary ID provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -926,6 +915,7 @@ router.patch('/removeItineraryFromSaved', async (req, res) => {
  *  delete:
  *    summary: Delete the saved list of a user
  *    description: Delete the saved list of a user based on the user ID provided
+ *    tags: [Trippler]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -973,6 +963,7 @@ router.delete('/deleteSavedList', async (req, res) => {
  *  post:
  *    summary: Add a stop to a day in an itinerary
  *    description: Add a stop to a day in an itinerary based on the id provided
+ *    tags: [Tappa]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -1039,6 +1030,7 @@ router.post('/addStop', async (req, res) => {
  *  delete:
  *    summary: Delete a stop from a day in an itinerary
  *    description: Delete a stop from a day in an itinerary based on the id provided
+ *    tags: [Tappa]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -1107,6 +1099,7 @@ router.delete('/deleteStop', async (req, res) => {
  *  put:
  *    summary: Replace a stop in a day in an itinerary
  *    description: Replace a stop in a day in an itinerary based on the id provided
+ *    tags: [Tappa]
  *    parameters:
  *      - in: header
  *        name: userId
@@ -1177,6 +1170,7 @@ router.put('/replaceStop', async (req, res) => {
  *  get:
  *    summary: Calculate the distance for a day in an itinerary
  *    description: Calculate the distance for a day in an itinerary based on the id provided
+ *    tags: [Giorno]
  *    parameters:
  *      - in: query
  *        name: idItinerario
@@ -1239,6 +1233,7 @@ router.get('/calcDistance', async (req, res) => {
  *  get:
  *    summary: Calculate the path for a day in an itinerary
  *    description: Calculate the path for a day in an itinerary based on the id provided
+ *    tags: [Giorno]
  *    parameters:
  *      - in: query
  *        name: idItinerario
@@ -1289,6 +1284,7 @@ router.get('/calcPath', async (req, res) => {
  *  get:
  *    summary: Calculate the total path for an itinerary
  *    description: Calculate the total path for an itinerary based on the id provided
+ *    tags: [Itinerario]
  *    parameters:
  *      - in: query
  *        name: idItinerario
