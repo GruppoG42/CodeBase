@@ -1,7 +1,4 @@
-const mongoose = require("mongoose")
 const request = require("supertest")
-const app = require("../server/app")
-// const {expect} = require("chai");
 const host = "http://localhost:3000"
 
 const userId = "google-oauth2|111261636165234106646"
